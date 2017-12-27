@@ -35,7 +35,7 @@ for dd in range(nDD):   # only loop through
     # Loop through the rest of time
     for t in range(1, N):
         xs[:, t] = params.cstr_model.run_reactor(xs[:, t-1], 0.0, params.h)  # actual plant
-        linxs[:, t] = numpy.matmul(linsystems[k].A, linxs[:, t-1]) + linsystems[k].B
+        linxs[:, t] = linsystems[k].A @ linxs[:, t-1] + linsystems[k].B
     
     for i in range(len(linxs[0])):
         linxs[:, i] += linsystems[k].b

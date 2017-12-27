@@ -20,8 +20,8 @@ class llds:
 
     def step(self, xprev, uprev):
         # Controlled, move multivariate self one time step forward.
-        xnow = numpy.matmul(self.A, xprev) + self.B*uprev
-        ynow = numpy.matmul(self.C, xnow)
+        xnow = self.A @ xprev + self.B*uprev
+        ynow = self.C @ xnow
 
         return xnow,  ynow
 
@@ -39,26 +39,26 @@ class llds:
 
     def step_predict(self, xprev, varprev, uprev):
         # Return the one step ahead predicted mean and covariance.
-        pmean = numpy.matmul(self.A, xprev) + self.B*uprev
-        pvar = self.Q + numpy.matmul(numpy.matmul(self.A, varprev), numpy.transpose(self.A))
+        pmean = self.A @ xprev + self.B*uprev
+        pvar = self.Q + self.A @ varprev @ numpy.transpose(self.A)
         return pmean, pvar
 
     def step_update(self, pmean, pvar, ymeas):
         # Return the one step ahead measurement updated mean and covar.
-        temp = numpy.matmul(numpy.matmul(self.C, pvar), numpy.transpose(self.C))
+        temp = self.C @ pvar @ numpy.transpose(self.C)
         inverse = numpy.linalg.inv(temp + self.R)
-        temp2 = numpy.matmul(pvar, numpy.transpose(self.C))
+        temp2 = pvar @ numpy.transpose(self.C)
         if temp2.ndim == 1:
             temp2 = numpy.transpose([temp2])
         
-        kalmanGain = numpy.matmul(temp2, inverse)
-        ypred = numpy.matmul(self.C, pmean)  # predicted measurement
+        kalmanGain = temp2 @ inverse
+        ypred = self.C @ pmean  # predicted measurement
         if ymeas.ndim == 0:
             updatedMean = pmean + numpy.transpose(kalmanGain*(ymeas - ypred))
         else:
-            updatedMean = pmean + numpy.transpose(numpy.matmul(kalmanGain, (ymeas - ypred)))
+            updatedMean = pmean + (kalmanGain @ (ymeas - ypred)).T
         rows, cols = numpy.shape(pvar)
-        updatedVar = numpy.matmul((numpy.eye(rows) - kalmanGain*self.C), pvar)
+        updatedVar = (numpy.eye(rows) - kalmanGain*self.C) @ pvar
         return updatedMean, updatedVar
 
     def smooth(self, kmeans, kcovars, us):

@@ -84,16 +84,16 @@ class Reactor:
         B = [B11, B21]
         A = self.jacobian(linpoint)
         F0 = self.reactor_ode(linpoint, 0.0)  # u = 0 because Bs account for the control term
-        D = numpy.matmul(A, linpoint)
+        D = A @ linpoint
         # now we have x' = Ax + Bu + F0 - D = F(x)
         # now write ito deviation variables!
-        newb = numpy.matmul(numpy.linalg.inv(A), D-F0)
+        newb = numpy.linalg.inv(A) @ (D-F0)
         # now we have xp' = Axp + Bu where x = xp + newb
 
         n = len(A)
         # Uses the bilinear transform aka the Tustin transform... google it...
-        newA = numpy.matmul((numpy.identity(n) + 0.5*h*A), numpy.linalg.inv(numpy.identity(n) - 0.5*h*A))
-        newB = numpy.matmul(numpy.matmul(numpy.linalg.inv(A), (newA-numpy.identity(n))), B)
+        newA = (numpy.identity(n) + 0.5*h*A) @ numpy.linalg.inv(numpy.identity(n) - 0.5*h*A)
+        newB = numpy.linalg.inv(A) @ (newA-numpy.identity(n)) @ B
 
         return newA, newB, newb
 

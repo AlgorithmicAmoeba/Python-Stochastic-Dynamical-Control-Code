@@ -19,7 +19,7 @@ class HMM:
         alpha[:, 0] = self.normalise(self.ep[evidence[0]]*initial)
 
         for ke in range(1, ne):    # loop through each evidence observation
-            predictions = numpy.matmul(self.tp, alpha[:, ke-1])
+            predictions = self.tp @ alpha[:, ke-1]
             alpha[:, ke] = self.normalise(self.ep[evidence[ke]]*predictions)
 
         return alpha
@@ -34,7 +34,7 @@ class HMM:
         beta[:, -1] = 1    # for correct Bayes
 
         for ke in range(ne-1, 0, -1):    # iterate backwards over evidence, evidence at t does not matter
-            beta[:, ke-1] = self.normalise(numpy.matmul(self.tp, beta[:, ke]*self.ep[evidence[ke]]))
+            beta[:, ke-1] = self.normalise(self.tp @ (beta[:, ke]*self.ep[evidence[ke]]))
         return beta
 
     def smooth(self, initial, evidence, timeLocation):
