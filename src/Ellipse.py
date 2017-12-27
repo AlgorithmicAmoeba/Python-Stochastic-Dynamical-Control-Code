@@ -39,7 +39,7 @@ def ellipse(mean, covariance, sigma=4.605):
     ellipse_x_r = a*numpy.cos(theta_grid)
     ellipse_y_r = b*numpy.sin(theta_grid)
 
-    #Define a rotation matrix
+    # Define a rotation matrix
     R = [[numpy.cos(phi), numpy.sin(phi)], [-numpy.sin(phi), numpy.cos(phi)]]
 
     # rotate the ellipse to some angle phi

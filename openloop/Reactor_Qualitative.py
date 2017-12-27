@@ -1,18 +1,23 @@
 # Qualitative Analysis of the CSTR
 # Nominal and bifurcation analysis
 
-import numpy, sys, matplotlib as mpl, matplotlib.pyplot as plt, scipy.optimize
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy
+import scipy.optimize
+import sys
+
 sys.path.append('../')
 import openloop.params as Params
 
 tend = 150
 params = Params.Params(tend)
 N = 100
-Ts = numpy.linspace(200, 600, N) # temperature range
-qrs1 = numpy.zeros(N) # heat removals
-qrs2 = numpy.zeros(N) # heat removals
-qrs3 = numpy.zeros(N) # heat removals
-qgs1 = numpy.zeros(N) # heat generations
+Ts = numpy.linspace(200, 600, N)  # temperature range
+qrs1 = numpy.zeros(N)  # heat removals
+qrs2 = numpy.zeros(N)  # heat removals
+qrs3 = numpy.zeros(N)  # heat removals
+qgs1 = numpy.zeros(N)  # heat generations
 
 for k in range(N):
     qrs1[k] = params.cstr_model.QR(Ts[k], -906.)
@@ -29,14 +34,14 @@ q1, = plt.plot(Ts, qrs1, "b", linewidth=1)
 q2, = plt.plot(Ts, qrs2, "g", linewidth=1)
 q3, = plt.plot(Ts, qrs3, "r", linewidth=1)
 opline1, = plt.plot(Ts, qgs1, "k", linewidth=1)
-plt.legend([q1,q2,q3, opline1],["Q=-906 kJ/min","Q=0 kJ/min","Q=1145 kJ/min","Operating Curve"], loc="best")
+plt.legend([q1, q2, q3, opline1], ["Q=-906 kJ/min", "Q=0 kJ/min", "Q=1145 kJ/min", "Operating Curve"], loc="best")
 plt.xlabel("Steady State Temperature [K]")
 plt.ylabel("Heat Removal Rate [K/min]")
 plt.ylim([0.0, 5])
 plt.xlim([200, 600])
 plt.show()
 
-#Get the steady state points
+# Get the steady state points
 xguess1 = [0.073, 493.0]
 xguess2 = [0.21, 467.0]
 xguess3 = [0.999, 310.0]
@@ -51,13 +56,13 @@ xx3res = scipy.optimize.fsolve(f, xguess3)
 
 print("Nominal Operating Points")
 print("High Heat: ", xx1res)
-print("Eigenvalues: ", numpy.linalg.eig(params.cstr_model.jacobian(xx1res ))[0])
+print("Eigenvalues: ", numpy.linalg.eig(params.cstr_model.jacobian(xx1res))[0])
 print("Medium Heat: ", xx2res)
 print("Eigenvalues: ", numpy.linalg.eig(params.cstr_model.jacobian(xx2res))[0])
 print("Low Heat: ", xx3res)
 print("Eigenvalues: ", numpy.linalg.eig(params.cstr_model.jacobian(xx3res))[0])
 
-## Get the bifurcation points
+# Get the bifurcation points
 # Low heat input
 xguess1 = [0.999, 272]
 xguess2 = [0.1089, 450]
@@ -69,13 +74,13 @@ while flag:
     f = lambda x: params.cstr_model.reactor_func(x, Q)
     xx1res = scipy.optimize.fsolve(f, xguess1)
     xx2res = scipy.optimize.fsolve(f, xguess2)
-    flag = sum(f(xx1res))  < 1e-8 and sum(f(xx2res))  < 1e-8
+    flag = sum(f(xx1res)) < 1e-8 and sum(f(xx2res)) < 1e-8
     if flag:
         prevss1 = xx1res
         prevss2 = xx2res
         Ql = Q
     Q = Q - 1
-    if Q<-908:
+    if Q < -908:
         flag = False
 
 print("Low heat: ", prevss1)

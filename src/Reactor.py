@@ -1,4 +1,7 @@
-import numpy, random, scipy.optimize
+import numpy
+import random
+import scipy.optimize
+
 
 class LinearReactor:
     def __init__(self, op, A, B, b):
@@ -6,6 +9,7 @@ class LinearReactor:
         self.A = A
         self.B = B
         self.b = b
+
 
 class Reactor:
     def __init__(self, V=5, R=8.314, CA0=1, TA0=310, dH=-4.78e4, k0=72e7, E=8.314e4, Cp=0.239, rho=1000, F=0.1):
@@ -34,8 +38,8 @@ class Reactor:
         xnow = numpy.zeros(2)
         xnow[0] = (self.F/self.V) * (self.CA0 - xprev[0]) - self.k0*numpy.exp(-self.E/(self.R*xprev[1]))*xprev[0]
         xnow[1] = (self.F/self.V) * (self.TA0 - xprev[1]) 
-        xnow[1]-= (self.dH/(self.rho*self.Cp))*self.k0*numpy.exp(-self.E/(self.R*xprev[1]))*xprev[0] 
-        xnow[1]+= u/(self.rho*self.Cp*self.V)
+        xnow[1] -= (self.dH/(self.rho*self.Cp))*self.k0*numpy.exp(-self.E/(self.R*xprev[1]))*xprev[0]
+        xnow[1] += u/(self.rho*self.Cp*self.V)
         return xnow
         
     def reactor_func(self, xprev, u):
@@ -44,8 +48,8 @@ class Reactor:
         xnow = [0]*2
         xnow[0] = (self.F/self.V) * (self.CA0 - xprev[0]) - self.k0*numpy.exp(-self.E/(self.R*xprev[1]))*xprev[0]
         xnow[1] = (self.F/self.V) * (self.TA0 - xprev[1])
-        xnow[1]-= (self.dH/(self.rho*self.Cp))*self.k0*numpy.exp(-self.E/(self.R*xprev[1]))*xprev[0] 
-        xnow[1]+= u/(self.rho*self.Cp*self.V)
+        xnow[1] -= (self.dH/(self.rho*self.Cp))*self.k0*numpy.exp(-self.E/(self.R*xprev[1]))*xprev[0]
+        xnow[1] += u/(self.rho*self.Cp*self.V)
         return xnow
 
     def jacobian(self, x):
@@ -79,7 +83,7 @@ class Reactor:
         B21 = 1.0/(self.rho*self.V*self.Cp)
         B = [B11, B21]
         A = self.jacobian(linpoint)
-        F0 = self.reactor_ode(linpoint, 0.0) # u = 0 because Bs account for the control term
+        F0 = self.reactor_ode(linpoint, 0.0)  # u = 0 because Bs account for the control term
         D = numpy.matmul(A, linpoint)
         # now we have x' = Ax + Bu + F0 - D = F(x)
         # now write ito deviation variables!
@@ -98,9 +102,9 @@ class Reactor:
         dx = (xspace[2] - xspace[1])/nX
         dy = (yspace[2] - yspace[1])/nY
 
-        operatingpoints = numpy.zeros([2,nX*nY + 3]) # add the three nominal points
+        operatingpoints = numpy.zeros([2, nX*nY + 3])  # add the three nominal points
 
-        k = 1 #counter
+        k = 1  # counter
         for x in range(nX):
             xnow = dx*(x-1) + xspace[1] + dx*0.5
             for y in range(nY):
@@ -116,10 +120,10 @@ class Reactor:
         # Perform the same action as discretise() except pick points to
         # discretise around at random.
         operatingpoints = numpy.zeros([2, npoints+3])
-        if npoints==0:
+        if npoints == 0:
             k = 0
         else:
-            k=1
+            k = 1
         for k in range(npoints):
             nx = random.random()
             ny = random.random()
@@ -135,7 +139,7 @@ class Reactor:
     def getLinearSystems(self, nX, nY, xspace, yspace, h):
         # Returns an array of linearised systems
 
-        N = nX*nY + 3 # add the three nominal operating points
+        N = nX*nY + 3  # add the three nominal operating points
         linsystems = [None]*N
         ops = self.discretise(nX, nY, xspace, yspace)
         for k in range(N):
@@ -148,7 +152,7 @@ class Reactor:
     def getLinearSystems_randomly(self, npoints, xspace, yspace, h):
         # Returns an array of linearised systems
 
-        N = npoints + 3 # add the three nominal operating points
+        N = npoints + 3  # add the three nominal operating points
         linsystems = [None]*N
         ops = self.discretise_randomly(npoints, xspace, yspace)
         for k in range(N):
@@ -163,7 +167,7 @@ class Reactor:
 
         linsystems = [None]*3
 
-        #Get the steady state points
+        # Get the steady state points
         xguess1 = [0.073, 493.0]
         xguess2 = [0.21, 467.0]
         xguess3 = [0.999, 310.0]
