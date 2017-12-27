@@ -9,7 +9,6 @@
 # Chapter 23, Example 23.3: Localisation Problem
 import sys, numpy, matplotlib as mpl, matplotlib.pyplot as plt
 sys.path.append('../')
-import src.HMM as HMM
 import src.Burglar as Burglar
 
 

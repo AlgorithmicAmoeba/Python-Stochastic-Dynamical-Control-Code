@@ -98,7 +98,7 @@ class llds:
         rows = len(kmean)
         n = len(us)
 
-        predicted_means, predicted_covars = predict_hidden(kmean, kcovar, us)
+        predicted_means, predicted_covars = self.predict_hidden(kmean, kcovar, us)
 
         rows = len(self.R) # actually just the standard deviation
         predicted_vis_means = numpy.zeros(rows, n)
@@ -126,7 +126,7 @@ class llds:
         predicted_covars[:, :, 0] = self.Q + self.A*kcovar*numpy.transpose(self.A)
 
         for k in range(1,n): #cast the state forward
-            predicted_means[:, k], predicted_covars[:, :, k] = step_predict(predicted_means[:,k-1], predicted_covars[:, :, k-1],us[k])
+            predicted_means[:, k], predicted_covars[:, :, k] = self.step_predict(predicted_means[:,k-1], predicted_covars[:, :, k-1],us[k])
         
 
         return predicted_means, predicted_covars

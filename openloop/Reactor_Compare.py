@@ -1,9 +1,9 @@
 # Compare the transient dynamics of two Reactors
 
 
-import numpy, sys, params, matplotlib as mpl, matplotlib.pyplot as plt, scipy.optimize
+import numpy, sys, matplotlib as mpl, matplotlib.pyplot as plt
 sys.path.append('../')
-import src.Reactor as Reactor
+import openloop.params as params
 
 tend = 300
 params = params.Params(tend)
@@ -45,7 +45,7 @@ plt.xlim([0, tend])
 plt.locator_params(nbins=6)
 
 plt.subplot(2,1,2)
-x1, = plt.plot(params.ts, xs1[1,:], "k", linewidth=1)
+plt.plot(params.ts, xs1[1,:], "k", linewidth=1)
 # x2, = plot(params.ts, xs2[2,:]', "r--", linewidth=1)
 plt.ylabel(r"T$_R$ [K]")
 plt.xlabel("Time [min]")

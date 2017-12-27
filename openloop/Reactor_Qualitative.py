@@ -1,12 +1,12 @@
 # Qualitative Analysis of the CSTR
 # Nominal and bifurcation analysis
 
-import numpy, sys, params, matplotlib as mpl, matplotlib.pyplot as plt, scipy.optimize
+import numpy, sys, matplotlib as mpl, matplotlib.pyplot as plt, scipy.optimize
 sys.path.append('../')
-import src.Reactor as Reactor
+import openloop.params as Params
 
 tend = 150
-params = params.Params(tend)
+params = Params.Params(tend)
 N = 100
 Ts = numpy.linspace(200, 600, N) # temperature range
 qrs1 = numpy.zeros(N) # heat removals

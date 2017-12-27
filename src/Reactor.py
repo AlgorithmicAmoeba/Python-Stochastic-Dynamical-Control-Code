@@ -121,8 +121,8 @@ class Reactor:
         else:
             k=1
         for k in range(npoints):
-            nx = random.rand()
-            ny = random.rand()
+            nx = random.random()
+            ny = random.random()
             xnow = xspace[1] + nx*(xspace[2] - xspace[1])
             ynow = yspace[1] + ny*(yspace[2] - yspace[1])
             operatingpoints[:, k] = [xnow, ynow]
@@ -137,10 +137,10 @@ class Reactor:
 
         N = nX*nY + 3 # add the three nominal operating points
         linsystems = [None]*N
-        ops = discretise(nX, nY, xspace, yspace)
+        ops = self.discretise(nX, nY, xspace, yspace)
         for k in range(N):
             op = ops[:, k]
-            A, B, b = linearise(op, h)
+            A, B, b = self.linearise(op, h)
             linsystems[k] = LinearReactor(op, A, B, b)
             
         return linsystems

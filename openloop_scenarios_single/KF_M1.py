@@ -1,10 +1,10 @@
 # Inference using one linear model measuring only temperature
 
 
-import sys, numpy, matplotlib as mpl, matplotlib.pyplot as plt
+import sys, numpy, matplotlib.pyplot as plt
 sys.path.append('../')
 import openloop.params
-import src.Reactor as Reactor, src.LLDS as LLDS, src.Results as Results
+import src.LLDS as LLDS, src.Results as Results
 
 tend = 50
 

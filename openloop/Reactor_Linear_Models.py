@@ -1,7 +1,7 @@
 # Linearisation Procedure
-import numpy, sys, params, matplotlib as mpl, matplotlib.pyplot as plt, scipy.optimize
+import numpy, sys, matplotlib as mpl, matplotlib.pyplot as plt
 sys.path.append('../')
-import src.Reactor as Reactor
+import openloop.params as params
 
 tend = 50
 params = params.Params(tend)
@@ -39,8 +39,8 @@ for dd in range(nDD): # only loop through
     
         
     plt.subplot(nDD, 1, dd+1)
-    x1, = plt.plot(xs[0], xs[1], "k", linewidth=3)
-    x2, = plt.plot(linxs[0], linxs[1], "r--", linewidth=3)
+    plt.plot(xs[0], xs[1], "k", linewidth=3)
+    plt.plot(linxs[0], linxs[1], "r--", linewidth=3)
     plt.plot(xs[0][0], xs[1][0], "ko", markersize=10, markeredgewidth = 4)
     plt.plot(xs[0][-1], xs[1][-1], "kx", markersize=10, markeredgewidth = 4)
     plt.plot(linxs[0][0], linxs[1][0], "ro", markersize=10, markeredgewidth = 4)
