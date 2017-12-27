@@ -14,12 +14,10 @@ def ellipse(mean, covariance, sigma=4.605):
         largest_eigenval = eigenval[0]
         largest_eigenvec = eigenvec[:, 0]
         smallest_eigenval = eigenval[1]
-        smallest_eigenvec = eigenvec[:, 1]
     else:
         largest_eigenval = eigenval[1]
         largest_eigenvec = eigenvec[:, 1]
         smallest_eigenval = eigenval[0]
-        smallest_eigenvec = eigenvec[:, 0]
 
     angle = numpy.arctan2(largest_eigenvec[1], largest_eigenvec[0])
 
@@ -30,8 +28,6 @@ def ellipse(mean, covariance, sigma=4.605):
 
     theta_grid = numpy.linspace(0.0, 2.0*numpy.pi)
     phi = angle
-    X0 = mean[0]
-    Y0 = mean[1]
     a = chisquare_val*numpy.sqrt(largest_eigenval)
     b = chisquare_val*numpy.sqrt(smallest_eigenval)
 

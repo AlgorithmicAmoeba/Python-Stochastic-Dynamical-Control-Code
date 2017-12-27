@@ -87,7 +87,6 @@ class llds:
         # Predict the visible states n steps into the future given the controller action.
         # Note: us[t] predicts xs[t+1]
 
-        rows = len(kmean)
         n = len(us)
 
         predicted_means, predicted_covars = self.predict_hidden(kmean, kcovar, us)

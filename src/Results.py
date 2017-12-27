@@ -28,9 +28,9 @@ def plotTracking(ts, xs, ys, fmeans, us, obs, setpoint):
     plt.subplot(subplt, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
     if obs == 2:  # plt.plot second measurement
-        y2, = plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
+        plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
         
-    k1, = plt.plot(ts[::skipmean], fmeans[0][::skipmean], "bx", markersize=5, markeredgewidth=2)
+    plt.plot(ts[::skipmean], fmeans[0][::skipmean], "bx", markersize=5, markeredgewidth=2)
     ksp = plt.plot(ts, setpoints, "g-", linewidth=3)
     plt.ylabel(r"C$_A$ [kmol.m$^{-3}$]")
     plt.locator_params(nbins=4)
@@ -38,7 +38,7 @@ def plotTracking(ts, xs, ys, fmeans, us, obs, setpoint):
     plt.xlim([0, tend])
 
     plt.subplot(subplt, 1, 2)
-    x2, = plt.plot(ts, xs[2, :], "k", linewidth=3)
+    plt.plot(ts, xs[2, :], "k", linewidth=3)
     if obs == 1:
         y2, = plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
     else:
@@ -78,9 +78,9 @@ def plotTracking(ts, xs, ys, fmeans, us, obs):
     plt.subplot(subplt, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
     if obs == 2:  # plt.plot second measurement
-        y2, = plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
+        plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
     
-    k1, = plt.plot(ts[::skipmean], fmeans[0][::skipmean], "bx", markersize=5, markeredgewidth=2)
+    plt.plot(ts[::skipmean], fmeans[0][::skipmean], "bx", markersize=5, markeredgewidth=2)
     plt.ylabel(r"C$_A$ [kmol.m$^{-3}$]")
     plt.locator_params(nbins=4)
     plt.legend([x1], ["Underlying model"], loc="best")
@@ -88,7 +88,7 @@ def plotTracking(ts, xs, ys, fmeans, us, obs):
     # ylim([0, 1])
 
     plt.subplot(subplt, 1, 2)
-    x2, = plt.plot(ts, xs[1, :], "k", linewidth=3)
+    plt.plot(ts, xs[1, :], "k", linewidth=3)
     if obs == 1:
         y2, = plt.plot(ts[::skipmeas], ys[::skipmeas], "kx", markersize=5, markeredgewidth=1)
     else:
@@ -264,7 +264,6 @@ def plotEllipseComp(f1means, f1covars, f2means, f2covars, xs, ts, sigma=4.605):
 
 def plotTrackingBreak(ts, xs, xsb, ys, fmeans, obs):
 
-    N = len(ts)
     tend = ts[-1]
     skipm = int(len(ts)/80)
     plt.figure()  # plt.plot filtered results
@@ -272,9 +271,9 @@ def plotTrackingBreak(ts, xs, xsb, ys, fmeans, obs):
     mpl.rc("text", usetex=True)
     plt.subplot(2, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
-    x1nf, = plt.plot(ts, xsb[0, :], "g--", linewidth=3)
+    plt.plot(ts, xsb[0, :], "g--", linewidth=3)
     if obs == 2:
-        y2, = plt.plot(ts[::skipm], ys[::skipm], "kx", markersize=5, markeredgewidth=1)
+        plt.plot(ts[::skipm], ys[::skipm], "kx", markersize=5, markeredgewidth=1)
     
     k1, = plt.plot(ts, fmeans[0, :], "r--", linewidth=3)
     plt.ylabel(r"C$_A$ [kmol.m$^{-3}$]")
@@ -282,14 +281,14 @@ def plotTrackingBreak(ts, xs, xsb, ys, fmeans, obs):
     plt.legend([x1, k1], ["Underlying model", "Filtered mean"], loc="best")
     plt.xlim([0, tend])
     plt.subplot(2, 1, 2)
-    x2, = plt.plot(ts, xs[2, :], "k", linewidth=3)
+    plt.plot(ts, xs[2, :], "k", linewidth=3)
     x2nf, = plt.plot(ts, xsb[2, :], "g--", linewidth=3)
     if obs == 1:
         y2, = plt.plot(ts[::skipm], ys[1][::skipm], "kx", markersize=5, markeredgewidth=1)
     else:
         y2, = plt.plot(ts[::skipm], ys[::skipm], "kx", markersize=5, markeredgewidth=1)
     
-    k2, = plt.plot(ts, fmeans[2, :], "r--", linewidth=3)
+    plt.plot(ts, fmeans[2, :], "r--", linewidth=3)
     plt.ylabel(r"T$_R$ [K]")
     plt.locator_params(nbins=4)
     plt.xlabel("Time [min]")
@@ -308,15 +307,15 @@ def plotTrackingTwoFilters(ts, xs, ys, f1means, f2means):
     plt.subplot(2, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
     k1, = plt.plot(ts[::skip], f1means[0][::skip], "rx", markersize=5, markeredgewidth=2)
-    y2, = plt.plot(ts[::skipm], ys[0][::skipm], "kx", markersize=5, markeredgewidth=1)
-    k12, = plt.plot(ts[::skip], f2means[0][::skip], "bx", markersize=5, markeredgewidth=2)
+    plt.plot(ts[::skipm], ys[0][::skipm], "kx", markersize=5, markeredgewidth=1)
+    plt.plot(ts[::skip], f2means[0][::skip], "bx", markersize=5, markeredgewidth=2)
     plt.ylabel(r"C$_A$ [kmol.m$^{-3}$]")
     plt.legend([x1, k1], ["Underlying model", "Particle filter"], loc="best", ncol=2)
     plt.xlim([0, tend])
     plt.subplot(2, 1, 2)
-    x2, = plt.plot(ts, xs[1, :], "k", linewidth=3)
+    plt.plot(ts, xs[1, :], "k", linewidth=3)
     y2, = plt.plot(ts[::skipm], ys[1][::skipm], "kx", markersize=5, markeredgewidth=1)
-    k2, = plt.plot(ts[::skip], f1means[1][::skip], "rx", markersize=5, markeredgewidth=2)
+    plt.plot(ts[::skip], f1means[1][::skip], "rx", markersize=5, markeredgewidth=2)
     k22, = plt.plot(ts[::skip], f2means[1][::skip], "bx", markersize=5, markeredgewidth=2)
     plt.ylabel(r"T$_R$ [K]")
     plt.xlabel("Time [min]")
@@ -381,7 +380,7 @@ def calcError3(x, y):
     return avediff1
 
 
-def calcEnergy(us, uss, h):
+def calcEnergy(us, uss):
     N = len(us)
     avecost = (1/(60*N))*sum(abs(us-uss))
     print("Average Input (kW): ", avecost)
