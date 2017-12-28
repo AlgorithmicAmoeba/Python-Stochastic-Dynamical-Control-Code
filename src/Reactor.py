@@ -177,9 +177,9 @@ class Reactor:
         def f(x):
             return self.reactor_func(x, 0.0)
 
-        xx1res = scipy.optimize.fsolve(f, xguess1)
-        xx2res = scipy.optimize.fsolve(f, xguess2)
-        xx3res = scipy.optimize.fsolve(f, xguess3)
+        xx1res = scipy.optimize.fsolve(f, numpy.array(xguess1))
+        xx2res = scipy.optimize.fsolve(f, numpy.array(xguess2))
+        xx3res = scipy.optimize.fsolve(f, numpy.array(xguess3))
 
         ops = numpy.zeros([len(xx1res), 3])
         ops[:, 0] = xx1res

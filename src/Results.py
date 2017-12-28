@@ -213,7 +213,7 @@ def plot_ellipses2(ts, xs, fmeans, fcovars, fname, line, sp, nf, sigma, pick, le
     # line = [b, c] => y + bx + c = 0
     # line => y = - bx - c
 
-    lxs = range(-0.1, 1.1, 0.05)
+    lxs = [x/100 for x in range(-10, 110, 5)]
     lys = -line[0]*lxs - line[1]
     plt.xlim([0.0, 1])
     plt.ylim([min(xs[1, :]-10), max(xs[1, :]+10)])

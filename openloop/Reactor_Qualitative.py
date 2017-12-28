@@ -51,11 +51,11 @@ def f(x):
     return params.cstr_model.reactor_func(x, 0.0)
 
 
-xx1res = scipy.optimize.fsolve(f, xguess1)
+xx1res = scipy.optimize.fsolve(f, numpy.array(xguess1))
 # writecsv("ss1.csv", xx1res.zero)
-xx2res = scipy.optimize.fsolve(f, xguess2)
+xx2res = scipy.optimize.fsolve(f, numpy.array(xguess2))
 # writecsv("ss2.csv", xx2res.zero)
-xx3res = scipy.optimize.fsolve(f, xguess3)
+xx3res = scipy.optimize.fsolve(f, numpy.array(xguess3))
 # writecsv("ss3.csv", xx3res.zero)
 
 print("Nominal Operating Points")
@@ -77,8 +77,8 @@ prevss2 = numpy.zeros(2)
 while flag:
     def f(x):
         return params.cstr_model.reactor_func(x, Q)
-    xx1res = scipy.optimize.fsolve(f, xguess1)
-    xx2res = scipy.optimize.fsolve(f, xguess2)
+    xx1res = scipy.optimize.fsolve(f, numpy.array(xguess1))
+    xx2res = scipy.optimize.fsolve(f, numpy.array(xguess2))
     flag = sum(f(xx1res)) < 1e-8 and sum(f(xx2res)) < 1e-8
     if flag:
         prevss1 = xx1res
@@ -103,8 +103,8 @@ Q = 1100.0
 while flag:
     def f(x):
         return params.cstr_model.reactor_func(x, Q)
-    xx1res = scipy.optimize.fsolve(f, xguess1)
-    xx2res = scipy.optimize.fsolve(f, xguess2)
+    xx1res = scipy.optimize.fsolve(f, numpy.array(xguess1))
+    xx2res = scipy.optimize.fsolve(f, numpy.array(xguess2))
     flag = sum(f(xx1res)) < 1e-8
     if flag:
         prevss1 = xx1res
