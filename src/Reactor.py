@@ -26,7 +26,7 @@ class Reactor:
         self.operatingpoints = None
         
     def run_reactor(self, xprev, u, h):
-        # Use Runga-Kutta method to solve for the next time step using the full
+        """Use Runga-Kutta method to solve for the next time step using the full"""
         k1 = self.reactor_ode(xprev, u)
         k2 = self.reactor_ode(xprev + 0.5*h*k1, u)
         k3 = self.reactor_ode(xprev + 0.5*h*k2, u)
@@ -35,7 +35,7 @@ class Reactor:
         return xnow
 
     def reactor_ode(self, xprev, u):
-        # Evaluate the ODE defs describing the reactor.
+        """Evaluate the ODE defs describing the reactor."""
         xnow = numpy.zeros(2)
         xnow[0] = (self.F/self.V) * (self.CA0 - xprev[0]) - self.k0*numpy.exp(-self.E/(self.R*xprev[1]))*xprev[0]
         xnow[1] = (self.F/self.V) * (self.TA0 - xprev[1]) 
@@ -44,8 +44,8 @@ class Reactor:
         return xnow
         
     def reactor_func(self, xprev, u):
-        # Evaluate the ODE defs describing the reactor. In the format required by NLsolve!
-        # xnow :: Array{Float64, 1} = zeros(2)
+        """Evaluate the ODE defs describing the reactor. In the format required by NLsolve!
+        xnow :: Array{Float64, 1} = zeros(2)"""
         xnow = [0]*2
         xnow[0] = (self.F/self.V) * (self.CA0 - xprev[0]) - self.k0*numpy.exp(-self.E/(self.R*xprev[1]))*xprev[0]
         xnow[1] = (self.F/self.V) * (self.TA0 - xprev[1])
@@ -54,7 +54,7 @@ class Reactor:
         return xnow
 
     def jacobian(self, x):
-        # Returns the Jacobian evaluated at x
+        """Returns the Jacobian evaluated at x"""
         J11 = -self.F/self.V-self.k0*numpy.exp(-self.E/(self.R*x[1]))
         J12 = -x[0]*self.k0*numpy.exp(-self.E/(self.R*x[1]))*(self.E/(self.R*x[1]**2))
         J21 = -self.dH/(self.rho*self.Cp)*self.k0*numpy.exp(-self.E/(self.R*x[1]))
@@ -64,7 +64,7 @@ class Reactor:
         return numpy.array([[J11, J12], [J21, J22]])
 
     def qg(self, T):
-        # Return the evaluated heat generation term.
+        """Return the evaluated heat generation term."""
         ca = self.F/self.V*self.CA0/(self.F/self.V + self.k0*numpy.exp(-self.E/(self.R*T)))
         qg = -self.dH/(self.rho*self.Cp)*self.k0*numpy.exp(-self.E/(self.R*T))*ca
         return qg
@@ -74,14 +74,14 @@ class Reactor:
         return ca
 
     def qr(self, T, Q):
-        # Return the evaluated heat removal term.
+        """Return the evaluated heat removal term."""
         qr = - self.F/self.V*(self.TA0 - T) - Q/(self.rho * self.V * self.Cp)
         return qr
         
     def linearise(self, linpoint, h):
-        # Returns the linearised coefficients of the Runge Kutta method
-        # given a linearisation point.
-        # To solve use x(k+1) =  Ax(k) + Bu(k)
+        """Returns the linearised coefficients of the Runge Kutta method
+        given a linearisation point.
+        To solve use x(k+1) =  Ax(k) + Bu(k)"""
         B11 = 0.0
         B21 = 1.0/(self.rho*self.V*self.Cp)
         B = [B11, B21]
@@ -101,7 +101,7 @@ class Reactor:
         return newA, newB, newb
 
     def discretise(self, nX, nY, xspace, yspace):
-        # Discrete the state space into nX*nY regions.
+        """Discrete the state space into nX*nY regions."""
         dx = (xspace[2] - xspace[1])/nX
         dy = (yspace[2] - yspace[1])/nY
 
@@ -121,8 +121,8 @@ class Reactor:
         return operatingpoints
 
     def discretise_randomly(self, npoints, xspace, yspace):
-        # Perform the same action as discretise() except pick points to
-        # discretise around at random.
+        """Perform the same action as discretise() except pick points to
+        discretise around at random."""
         operatingpoints = numpy.zeros([2, npoints+3])
         if npoints == 0:
             k = 0
@@ -142,7 +142,7 @@ class Reactor:
         return operatingpoints
 
     def get_linear_systems(self, nX, nY, xspace, yspace, h):
-        # Returns an array of linearised systems
+        """Returns an array of linearised systems"""
 
         N = nX*nY + 3  # add the three nominal operating points
         linsystems = [None]*N
@@ -155,7 +155,7 @@ class Reactor:
         return linsystems
 
     def get_linear_systems_randomly(self, npoints, xspace, yspace, h):
-        # Returns an array of linearised systems
+        """Returns an array of linearised systems"""
 
         N = npoints + 3  # add the three nominal operating points
         linsystems = [None]*N
@@ -168,7 +168,7 @@ class Reactor:
         return linsystems
 
     def get_nominal_linear_systems(self, h):
-        # Returns an array of linearised systems
+        """Returns an array of linearised systems"""
 
         linsystems = [None]*3
 

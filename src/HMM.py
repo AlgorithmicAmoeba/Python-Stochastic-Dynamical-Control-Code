@@ -8,12 +8,12 @@ class HMM:
         self.normalised = None
 
     def normalise(self, vec):
-        # Normalise mat such that sum(vec) = 1
+        """Normalise mat such that sum(vec) = 1"""
         self.normalised = vec/sum(vec)
         return vec/sum(vec)
 
     def forward(self, initial, evidence):
-        # Forwards algorithm for hmm
+        """Forwards algorithm for hmm"""
         ns = len(self.tp)    # number of states
         ne = len(evidence)    # number of observations
         alpha = numpy.zeros([ns, ne])    # matrix of forward probabilities
@@ -27,7 +27,7 @@ class HMM:
         return alpha
 
     def backward(self, evidence):
-        # Backwards algorithm for hmm.
+        """Backwards algorithm for hmm"""
         ns = len(self.tp)    # number of states
         ne = len(evidence)    # number of observations
         beta = numpy.zeros([ns, ne])    # matrix of forward probabilities
@@ -40,8 +40,7 @@ class HMM:
         return beta
 
     def smooth(self, initial, evidence, timeLocation):
-        # Forwards-Backwards algorithm. Note that it is required to split the evidence
-        # accordingly.
+        """Forwards-Backwards algorithm. Note that it is required to split the evidence accordingly."""
         forwardEvidence = evidence[0:timeLocation+1]
         backwardEvidence = evidence[timeLocation:]
 
@@ -53,7 +52,7 @@ class HMM:
         return smoothed
 
     def viterbi(self, initial, evidence):
-        # The Viterbi algorithm for the most likely joint sequence of states given observations.
+        """The Viterbi algorithm for the most likely joint sequence of states given observations."""
         ns = len(self.tp)    # number of states
         ne = len(evidence)    # number of observations
         mu = numpy.zeros([ns, ne])    # matrix of most likely values per state
@@ -78,7 +77,7 @@ class HMM:
         return mlss
 
     def max_viterbi(self, state, evidence, mu_before):
-        # Finds the maximum mu factor given the evidence and previous state
+        """Finds the maximum mu factor given the evidence and previous state"""
         ns = len(self.tp)   # number of states
         vmax = 0
 
@@ -90,7 +89,7 @@ class HMM:
         return vmax
 
     def arg_viterbi_init(self, initial, evidence, mu_vec):
-        # Finds the most likely state given the first observation
+        """Finds the most likely state given the first observation"""
 
         ns = len(self.tp)   # number of states
         mls = 0   # most likely state
@@ -106,7 +105,7 @@ class HMM:
         return mls
 
     def arg_viterbi(self, evidence, mu_vec, prev_mls):
-        # Finds the most likely sequence of states using mu
+        """Finds the most likely sequence of states using mu"""
         ns = len(self.tp)   # number of states
         mls = 0   # most likely state
         smax = 0   # state value maximum
@@ -120,7 +119,7 @@ class HMM:
         return mls
 
     def prediction(self, initial, evidence):
-        # One step ahead hidden state and observation estimator
+        """One step ahead hidden state and observation estimator"""
         ns = len(self.tp)
         ne = len(self.ep)
 
@@ -166,7 +165,7 @@ class HMM:
                 if ke == ne-1 and v_max > v_max_end:
                     v_max_end = v_max
                     s_max_end = ks
-        
+
         seq = numpy.zeros([ne], dtype=numpy.int)
         ptr = s_max_end
         for ke in range(ne-1, -1, -1):

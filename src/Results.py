@@ -391,8 +391,8 @@ def calc_energy(us, uss):
 
 
 def check_constraint(ts, xs, line):
-    # line = [b, c] => y + bx + c = 0
-    # line => y = - bx - c
+    """line = [b, c] => y + bx + c = 0
+    line => y = - bx - c"""
     r, N = len(xs)
     conmargin = numpy.zeros([N])
     minneg = float("inf")
@@ -423,8 +423,8 @@ def check_constraint(ts, xs, line):
     
 
 def get_mc_res(xs, sigmas, line, mcdistmat, counter, h):
-    # line = [b, c] => y + bx + c = 0
-    # line => y = - bx - c
+    """line = [b, c] => y + bx + c = 0
+    line => y = - bx - c"""
     d = [line[0], 0]
     r, N = len(xs)
     negdist = 0

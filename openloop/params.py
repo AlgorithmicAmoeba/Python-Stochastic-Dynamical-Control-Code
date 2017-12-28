@@ -9,7 +9,7 @@ import src.Reactor as Reactor
 
 
 class Params:
-    # Extend the Base Library
+    """Extend the Base Library"""
       
     def __init__(self, tend):
         self.tend = tend

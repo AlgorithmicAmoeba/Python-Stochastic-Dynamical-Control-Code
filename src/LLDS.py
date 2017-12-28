@@ -2,15 +2,17 @@ import numpy
 
 
 class LLDS:
-    # Assume zero mean transition and emission defs.
-    # The linear latent dynamical system should have the
-    # state space form:
-    # x(t+1) = A*x(t) + Bu(t) + Q
-    # y(t+1) = C*x(t+1) + R (there could be Du(t) term here but we assume the inputs don't affect
-    # the measurements directly.)
-    # I assume the simplest self I will deal with has matrix A, B and float C therefore
-    # the slightly parametric type. Also that specific simple case has only one input.
-    # this is to avoid ugly notation later.
+    """
+    Assume zero mean transition and emission defs.
+    The linear latent dynamical system should have the
+    state space form:
+    x(t+1) = A*x(t) + Bu(t) + Q
+    y(t+1) = C*x(t+1) + R (there could be Du(t) term here but we assume the inputs don't affect
+    the measurements directly.)
+    I assume the simplest self I will deal with has matrix A, B and float C therefore
+    the slightly parametric type. Also that specific simple case has only one input.
+    this is to avoid ugly notation later.
+    """
     def __init__(self, A, B, C, Q, R):
         self.A = A
         self.B = B
@@ -19,38 +21,37 @@ class LLDS:
         self.R = R  # Measurement Noise VARIANCE
 
     def step(self, xprev, uprev):
-        # Controlled, move multivariate self one time step forward.
+        """Controlled, move multivariate self one time step forward."""
         xnow = self.A @ xprev + self.B*uprev
         ynow = self.C @ xnow
 
         return xnow,  ynow
 
     def init_filter(self, initmean, initvar, ynow):
-        # Initialise the filter. No prediction step, only a measurement update step.
+        """Initialise the filter. No prediction step, only a measurement update step."""
         updatedMean, updatedVar = self.step_update(initmean, initvar, ynow)
         return updatedMean, updatedVar
 
     def step_filter(self, prevmean, prevvar, uprev, ynow):
-        # Return the posterior over the current state given the observation and previous
-        # filter result.
+        """Return the posterior over the current state given the observation and previous filter result."""
         pmean, pvar = self.step_predict(prevmean, prevvar, uprev)
         updatedMean, updatedVar = self.step_update(pmean, pvar, ynow)
         return updatedMean, updatedVar
 
     def step_predict(self, xprev, varprev, uprev):
-        # Return the one step ahead predicted mean and covariance.
+        """Return the one step ahead predicted mean and covariance."""
         pmean = self.A @ xprev + self.B*uprev
         pvar = self.Q + self.A @ varprev @ numpy.transpose(self.A)
         return pmean, pvar
 
     def step_update(self, pmean, pvar, ymeas):
-        # Return the one step ahead measurement updated mean and covar.
+        """Return the one step ahead measurement updated mean and covar."""
         temp = self.C @ pvar @ numpy.transpose(self.C)
         inverse = numpy.linalg.inv(temp + self.R)
         temp2 = pvar @ numpy.transpose(self.C)
         if temp2.ndim == 1:
             temp2 = numpy.transpose([temp2])
-        
+
         kalmanGain = temp2 @ inverse
         ypred = self.C @ pmean  # predicted measurement
         if ymeas.ndim == 0:
@@ -62,8 +63,8 @@ class LLDS:
         return updatedMean, updatedVar
 
     def smooth(self, kmeans, kcovars, us):
-        # Returns the smoothed means and covariances
-        # Note, this is only for matrix entries!
+        """Returns the smoothed means and covariances
+        Note, this is only for matrix entries!"""
         rows, cols = numpy.shape(kmeans)
         smoothedmeans = numpy.zeros([rows, cols])
         smoothedvars = numpy.zeros([rows, rows, cols])
@@ -84,8 +85,8 @@ class LLDS:
         return smoothedmeans, smoothedvars
 
     def predict_visible(self, kmean, kcovar, us):
-        # Predict the visible states n steps into the future given the controller action.
-        # Note: us[t] predicts xs[t+1]
+        """Predict the visible states n steps into the future given the controller action.
+        Note: us[t] predicts xs[t+1]"""
 
         n = len(us)
 
@@ -103,8 +104,8 @@ class LLDS:
         return predicted_vis_means, predicted_vis_covars
 
     def predict_hidden(self, kmean, kcovar, us):
-        # Predict the hidden states n steps into the future given the controller action.
-        # Note: us[t] predicts xs[t+1]
+        """Predict the hidden states n steps into the future given the controller action.
+        Note: us[t] predicts xs[t+1]"""
 
         rows = len(kmean)
         n = len(us)
@@ -116,9 +117,9 @@ class LLDS:
 
         for k in range(1, n):  # cast the state forward
             temp = self.step_predict(predicted_means[:, k-1], predicted_covars[:, :, k-1], us[k])
-            predicted_means[:, k], predicted_covars[:, :, k] = temp
+            predicted_means[:, k], predicted_covars[:, :, k]
 
         return predicted_means, predicted_covars
-        
+
 
 

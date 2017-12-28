@@ -52,7 +52,7 @@ class House:
         return HMM.HMM(tp, ep)
 
     def get_legal_moves(self, k):
-        # Returns an array of legal moves
+        """Returns an array of legal moves"""
         moves = []
         loc = k
 
@@ -68,7 +68,7 @@ class House:
         return moves
 
     def move(self):
-        # Move the burglar
+        """Move the burglar"""
         moves = self.get_legal_moves(self.burglar)
         self.floor[self.burglar//self.n][self.burglar % self.n] = 0
         self.burglar = moves[int(random.random()*len(moves))]

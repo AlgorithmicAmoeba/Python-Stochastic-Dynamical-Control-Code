@@ -3,9 +3,9 @@ import numpy
 
 
 def ellipse(mean, covariance, sigma=4.605):
-    # Plots a confidence ellipse around 2D Gaussian.
-    # Converted to Julia from the Matlab function:
-    # http://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
+    """Plots a confidence ellipse around 2D Gaussian.
+    Converted to Julia from the Matlab function:
+    http://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/"""
 
     # Calculate the eigenvectors and eigenvalues
     eigenval, eigenvec = numpy.linalg.eig(covariance)
