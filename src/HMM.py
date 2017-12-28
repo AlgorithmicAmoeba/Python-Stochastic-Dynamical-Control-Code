@@ -5,9 +5,11 @@ class HMM:
     def __init__(self, tp, ep):
         self.tp = tp
         self.ep = ep
+        self.normalised = None
 
     def normalise(self, vec):
         # Normalise mat such that sum(vec) = 1
+        self.normalised = vec/sum(vec)
         return vec/sum(vec)
 
     def forward(self, initial, evidence):

@@ -10,8 +10,6 @@ import src.Reactor as Reactor
 
 class Params:
     # Extend the Base Library
-    def convert_to_scalar(self, x):
-        return x[1]
       
     def __init__(self, tend):
         self.tend = tend

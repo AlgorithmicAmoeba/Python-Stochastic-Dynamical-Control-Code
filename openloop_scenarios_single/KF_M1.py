@@ -13,7 +13,7 @@ import src.Results as Results
 tend = 50
 
 params = openloop.params.Params(tend)
-init_state = [0.5, 400]
+init_state = numpy.array([0.5, 400])
 
 # Specify the linear model
 linsystems = params.cstr_model.get_nominal_linear_systems(params.h)
@@ -46,7 +46,7 @@ for t in range(1, params.N):
     params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist
     meas_noise_dist = numpy.random.normal(0, numpy.sqrt(params.R1[0]))
     params.ys1[t] = params.C1 @ params.xs[:, t] + meas_noise_dist  # measured from actual plant
-    params.linxs[:, t], temp = lin_cstr.step(params.linxs[:, t-1], params.us[t-1])
+    params.linxs[:, t], _ = lin_cstr.step(params.linxs[:, t-1], params.us[t-1])
     temp = lin_cstr.step_filter(kfmeans[:, t-1], kfcovars[:, :, t-1], params.us[t-1], params.ys1[t] - b[1])
     kfmeans[:, t], kfcovars[:, :, t] = temp
 
@@ -56,7 +56,7 @@ for i in range(len(params.linxs[0])):
 
 # Plot results
 
-Results.plot_ellipses1(params.ts, params.xs, kfmeans, kfcovars, "Kalman Filter", "upper right")
+Results.plot_ellipses1(params.ts, params.xs, kfmeans, kfcovars, "upper right")
 
 Results.plot_tracking(params.ts, params.xs, params.ys1, kfmeans, params.us, 1)
 

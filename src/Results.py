@@ -8,7 +8,7 @@ sys.path.append('../')
 import src.Ellipse as Ellipse
 
 
-def plot_tracking(ts, xs, ys, fmeans, us, obs, setpoint):
+def plot_tracking1(ts, xs, ys, fmeans, us, obs, setpoint):
 
     tend = ts[-1]
     setpoints = numpy.ones(len(ts))*setpoint
@@ -116,7 +116,7 @@ def plot_state_space_switch(linsystems, xs):
     plt.figure()  # Model and state space
     for k in range(len(linsystems)):
         plt.plot(linsystems[k].op[0], linsystems[k].op[1], "kx", markersize=5, markeredgewidth=1)
-        plt.annotate(latexstring("M_", k),
+        plt.annotate(r"M_k",
                      xy=[linsystems[k].op[0], linsystems[k].op[1]],
                      xytext=[linsystems[k].op[0], linsystems[k].op[1]],
                      fontlen=12.0,
@@ -143,21 +143,21 @@ def plot_switch_selection(numSwitches, strack, ts, cbaron):
         ax = plt.subplot(numSwitches, 1, k)
         axes[k] = ax
         if cbaron:
-            im = plt.imshow(repeat(strack[k, :], outer=[width, 1]), cmap="cubehelix_r",
+            im = plt.imshow(strack[k, :] * width, cmap="cubehelix_r",
                             vmin=0.0, vmax=1, interpolation="nearest", aspect="auto")
         else:
-            im = plt.imshow(repeat(strack[k, :], outer=[width, 1]), cmap="binary",
+            im = plt.imshow(strack[k, :] * width, cmap="binary",
                             vmin=0.0, vmax=1, interpolation="nearest", aspect="auto")
         
         plt.tick_params(axis="y", which="both", left="off", right="off", labelleft="off")
         plt.tick_params(axis="x", which="both", bottom="off", labelbottom="off")
-        plt.ylabel(latexstring("M_", k))
+        plt.ylabel(r"M_k")
 
     plt.tick_params(axis="x", labelbottom="on")
     tempts = range(0, len(ts), int(len(ts)/10.0))
     temp = [None]*len(tempts)
     for lat in range(len(tempts)):
-        temp[lat] = latexstring(ts[tempts[lat]])
+        temp[lat] = ts[tempts[lat]]
 
     plt.xticks(tempts, temp)
 
@@ -167,7 +167,7 @@ def plot_switch_selection(numSwitches, strack, ts, cbaron):
     plt.xlabel("Time [min]")
 
 
-def plot_ellipses1(ts, xs, fmeans, fcovars, fname, legloc):
+def plot_ellipses1(ts, xs, fmeans, fcovars, legloc):
 
     mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
@@ -189,7 +189,7 @@ def plot_ellipses1(ts, xs, fmeans, fcovars, fname, legloc):
     plt.legend([x1, f1, b1], ["Underlying model", "Filtered mean", r"90$\%$ Confidence region"], loc=legloc)
 
 
-def plot_ellipses2(ts, xs, fmeans, fcovars, fname, line, sp, nf, sigma, pick, legloc):
+def plot_ellipses2(ts, xs, fmeans, fcovars,  line, sp, nf, sigma, pick, legloc):
 
     mpl.rc("font", family="serif", serif="Computer Modern", len=12)
     mpl.rc("text", usetex=True)

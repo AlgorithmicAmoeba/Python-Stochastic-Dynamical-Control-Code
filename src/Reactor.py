@@ -23,6 +23,7 @@ class Reactor:
         self.Cp = Cp
         self.rho = rho
         self.F = F
+        self.operatingpoints = None
         
     def run_reactor(self, xprev, u, h):
         # Use Runga-Kutta method to solve for the next time step using the full
@@ -116,6 +117,7 @@ class Reactor:
         operatingpoints[:, k] = [0.009718824131074055, 508.0562351737852]
         operatingpoints[:, k+1] = [0.48934869384879404, 412.1302612302412]
         operatingpoints[:, k+2] = [0.9996453064079288, 310.07093871841454]
+        self.operatingpoints = operatingpoints
         return operatingpoints
 
     def discretise_randomly(self, npoints, xspace, yspace):
@@ -136,6 +138,7 @@ class Reactor:
         operatingpoints[:, k] = [0.009718824131074055, 508.0562351737852]
         operatingpoints[:, k+1] = [0.48934869384879404, 412.1302612302412]
         operatingpoints[:, k+2] = [0.9996453064079288, 310.07093871841454]
+        self.operatingpoints = operatingpoints
         return operatingpoints
 
     def get_linear_systems(self, nX, nY, xspace, yspace, h):
