@@ -43,11 +43,12 @@ kfmeans[:, 0], kfcovars[:, :, 0] = lin_cstr.init_filter(init_mean, params.init_s
 
 for t in range(1, params.N):
     state_noise_dist = numpy.random.multivariate_normal(numpy.zeros([len(params.Q)]), params.Q)
-    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist  # actual plant
+    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist
     meas_noise_dist = numpy.random.normal(0, numpy.sqrt(params.R1[0]))
     params.ys1[t] = params.C1 @ params.xs[:, t] + meas_noise_dist  # measured from actual plant
     params.linxs[:, t], temp = lin_cstr.step(params.linxs[:, t-1], params.us[t-1])
-    kfmeans[:, t], kfcovars[:, :, t] = lin_cstr.step_filter(kfmeans[:, t-1], kfcovars[:, :, t-1], params.us[t-1], params.ys1[t] - b[1])
+    temp = lin_cstr.step_filter(kfmeans[:, t-1], kfcovars[:, :, t-1], params.us[t-1], params.ys1[t] - b[1])
+    kfmeans[:, t], kfcovars[:, :, t] = temp
 
 for i in range(len(params.linxs[0])):
     params.linxs[:, i] += b

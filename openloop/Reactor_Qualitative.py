@@ -45,7 +45,11 @@ plt.show()
 xguess1 = [0.073, 493.0]
 xguess2 = [0.21, 467.0]
 xguess3 = [0.999, 310.0]
-f = lambda x: params.cstr_model.reactor_func(x, 0.0)
+
+
+def f(x):
+    return params.cstr_model.reactor_func(x, 0.0)
+
 
 xx1res = scipy.optimize.fsolve(f, xguess1)
 # writecsv("ss1.csv", xx1res.zero)
@@ -71,7 +75,8 @@ Q = -900.0
 prevss1 = numpy.zeros(2)
 prevss2 = numpy.zeros(2)
 while flag:
-    f = lambda x: params.cstr_model.reactor_func(x, Q)
+    def f(x):
+        return params.cstr_model.reactor_func(x, Q)
     xx1res = scipy.optimize.fsolve(f, xguess1)
     xx2res = scipy.optimize.fsolve(f, xguess2)
     flag = sum(f(xx1res)) < 1e-8 and sum(f(xx2res)) < 1e-8
@@ -96,7 +101,8 @@ xguess2 = [0.0011, 570.0]
 flag = True
 Q = 1100.0
 while flag:
-    f = lambda x: params.cstr_model.reactor_func(x, Q)
+    def f(x):
+        return params.cstr_model.reactor_func(x, Q)
     xx1res = scipy.optimize.fsolve(f, xguess1)
     xx2res = scipy.optimize.fsolve(f, xguess2)
     flag = sum(f(xx1res)) < 1e-8

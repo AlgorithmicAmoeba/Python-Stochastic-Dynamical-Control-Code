@@ -57,7 +57,9 @@ class Reactor:
         J11 = -self.F/self.V-self.k0*numpy.exp(-self.E/(self.R*x[1]))
         J12 = -x[0]*self.k0*numpy.exp(-self.E/(self.R*x[1]))*(self.E/(self.R*x[1]**2))
         J21 = -self.dH/(self.rho*self.Cp)*self.k0*numpy.exp(-self.E/(self.R*x[1]))
-        J22 = -(self.F/self.V + self.dH/(self.rho*self.Cp)*self.k0*numpy.exp(-self.E/(self.R*x[1]))*(self.E/(self.R*x[1]**2))*x[0])
+        J22 = self.F/self.V
+        J22 += self.dH/(self.rho*self.Cp)*self.k0*numpy.exp(-self.E/(self.R*x[1]))*(self.E/(self.R*x[1]**2))*x[0]
+        J22 = - J22
         return numpy.array([[J11, J12], [J21, J22]])
 
     def qg(self, T):
@@ -171,7 +173,9 @@ class Reactor:
         xguess1 = [0.073, 493.0]
         xguess2 = [0.21, 467.0]
         xguess3 = [0.999, 310.0]
-        f = lambda x: self.reactor_func(x, 0.0)
+
+        def f(x):
+            return self.reactor_func(x, 0.0)
 
         xx1res = scipy.optimize.fsolve(f, xguess1)
         xx2res = scipy.optimize.fsolve(f, xguess2)

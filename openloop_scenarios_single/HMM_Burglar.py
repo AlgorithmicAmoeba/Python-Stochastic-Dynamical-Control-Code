@@ -84,37 +84,43 @@ for t in range(T):
     plt.title("t={0}".format(t+1), fontsize=fs)
     if t == 0:
         plt.ylabel("Noises", fontsize=fs)
-    plt.tick_params(axis="both", which="both", bottom="off", top="off", left="off", right="off", labelbottom="off", labelleft="off")
+    plt.tick_params(axis="both", which="both", bottom="off", top="off",
+                    left="off", right="off", labelbottom="off", labelleft="off")
 
     plt.subplot(6, T, t+1+T)
     plt.imshow(movements[:, :, t], cmap="Greys", interpolation="nearest")
     if t == 0:
         plt.ylabel("True Location", fontsize=fs)
-    plt.tick_params(axis="both", which="both", bottom="off", top="off", left="off", right="off", labelbottom="off", labelleft="off")
+    plt.tick_params(axis="both", which="both", bottom="off", top="off",
+                    left="off", right="off", labelbottom="off", labelleft="off")
 
     plt.subplot(6, T, t+1+2*T)
     plt.imshow(numpy.reshape(filter_[:, t], [n, n]), cmap="Greys", interpolation="nearest")
     if t == 0:
         plt.ylabel("Filtering", fontsize=fs)
-    plt.tick_params(axis="both", which="both", bottom="off", top="off", left="off", right="off", labelbottom="off", labelleft="off")
+    plt.tick_params(axis="both", which="both", bottom="off", top="off",
+                    left="off", right="off", labelbottom="off", labelleft="off")
 
     plt.subplot(6, T, t+1+3*T)
     plt.imshow(numpy.reshape(fbs[:, t], [n, n]), cmap="Greys", interpolation="nearest")
     if t == 0:
         plt.ylabel("Smoothing", fontsize=fs)
-    plt.tick_params(axis="both", which="both", bottom="off", top="off", left="off", right="off", labelbottom="off", labelleft="off")
+    plt.tick_params(axis="both", which="both", bottom="off", top="off",
+                    left="off", right="off", labelbottom="off", labelleft="off")
 
     plt.subplot(6, T, t+1+4*T)
     plt.imshow(mlmove[:, :, t], cmap="Greys", interpolation="nearest")
     if t == 0:
         plt.ylabel("Viterbi", fontsize=fs)
-    plt.tick_params(axis="both", which="both", bottom="off", top="off", left="off", right="off", labelbottom="off", labelleft="off")
+    plt.tick_params(axis="both", which="both", bottom="off", top="off",
+                    left="off", right="off", labelbottom="off", labelleft="off")
 
     plt.subplot(6, T, t+1+5*T)
     plt.imshow(predmove[:, :, t], cmap="Greys", interpolation="nearest")
     if t == 0:
         plt.ylabel("Prediction", fontsize=fs)
-    plt.tick_params(axis="both", which="both", bottom="off", top="off", left="off", right="off", labelbottom="off", labelleft="off")
+    plt.tick_params(axis="both", which="both", bottom="off", top="off",
+                    left="off", right="off", labelbottom="off", labelleft="off")
 
 # plt.show()
 
@@ -123,11 +129,13 @@ fs = 34  # much larger because the pictures are bigger
 plt.subplot(1, 2, 1)
 plt.imshow(house.creaks, cmap="Greys", interpolation="nearest")
 plt.title("Creaks", fontsize=fs)
-plt.tick_params(axis="both", which="both", bottom="off", top="off", left="off", right="off", labelbottom="off", labelleft="off")
+plt.tick_params(axis="both", which="both", bottom="off", top="off",
+                left="off", right="off", labelbottom="off", labelleft="off")
 
 plt.subplot(1, 2, 2)
 plt.imshow(house.bumps, cmap="Greys", interpolation="nearest")
 plt.title("Bumps", fontsize=fs)
-plt.tick_params(axis="both", which="both", bottom="off", top="off", left="off", right="off", labelbottom="off", labelleft="off")
+plt.tick_params(axis="both", which="both", bottom="off", top="off",
+                left="off", right="off", labelbottom="off", labelleft="off")
 
 plt.show()

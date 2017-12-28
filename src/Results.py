@@ -117,11 +117,11 @@ def plot_state_space_switch(linsystems, xs):
     for k in range(len(linsystems)):
         plt.plot(linsystems[k].op[0], linsystems[k].op[1], "kx", markersize=5, markeredgewidth=1)
         plt.annotate(latexstring("M_", k),
-            xy=[linsystems[k].op[0], linsystems[k].op[1]],
-            xytext=[linsystems[k].op[0], linsystems[k].op[1]],
-            fontlen=12.0,
-            ha="center",
-            va="bottom")
+                     xy=[linsystems[k].op[0], linsystems[k].op[1]],
+                     xytext=[linsystems[k].op[0], linsystems[k].op[1]],
+                     fontlen=12.0,
+                     ha="center",
+                     va="bottom")
         
     plt.plot(xs[0], xs[1], "k", linewidth=3)
     plt.plot(xs[0][0], xs[1][0], "ko", markersize=10, markeredgewidth=4)
@@ -143,9 +143,11 @@ def plot_switch_selection(numSwitches, strack, ts, cbaron):
         ax = plt.subplot(numSwitches, 1, k)
         axes[k] = ax
         if cbaron:
-            im = plt.imshow(repeat(strack[k, :], outer=[width, 1]), cmap="cubehelix_r", vmin=0.0, vmax=1, interpolation="nearest", aspect="auto")
+            im = plt.imshow(repeat(strack[k, :], outer=[width, 1]), cmap="cubehelix_r",
+                            vmin=0.0, vmax=1, interpolation="nearest", aspect="auto")
         else:
-            im = plt.imshow(repeat(strack[k, :], outer=[width, 1]), cmap="binary", vmin=0.0, vmax=1, interpolation="nearest", aspect="auto")
+            im = plt.imshow(repeat(strack[k, :], outer=[width, 1]), cmap="binary",
+                            vmin=0.0, vmax=1, interpolation="nearest", aspect="auto")
         
         plt.tick_params(axis="y", which="both", left="off", right="off", labelleft="off")
         plt.tick_params(axis="x", which="both", bottom="off", labelbottom="off")
@@ -259,7 +261,8 @@ def plot_ellipse_comp(f1means, f1covars, f2means, f2covars, xs, ts, sigma=4.605)
     plt.plot(xs[0, -1], xs[1, -1], "kx", markersize=10, markeredgewidth=4)
     plt.ylabel(r"T$_R$ [K]")
     plt.xlabel(r"C$_A$ [kmol.m$^{-3}$]")
-    plt.legend([x1, f1, f2, b1, b2], ["Underlying model", "Particle filter", "Kalman filter", r"PF 90$\%$ Confidence region", r"KF 90$\%$ Confidence region"], loc="best")
+    plt.legend([x1, f1, f2, b1, b2], ["Underlying model", "Particle filter", "Kalman filter",
+                                      r"PF 90$\%$ Confidence region", r"KF 90$\%$ Confidence region"], loc="best")
 
 
 def plot_tracking_break(ts, xs, xsb, ys, fmeans, obs):
