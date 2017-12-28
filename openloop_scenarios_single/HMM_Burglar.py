@@ -20,7 +20,7 @@ T = 10
 n = 5
 
 house = Burglar.House(n)
-hmm = house.createHMM()  # create the hidden markov model
+hmm = house.create_hmm()  # create the hidden markov model
 
 movements = numpy.zeros([n, n, T])
 locs = numpy.zeros([T], dtype=numpy.int)
@@ -36,7 +36,7 @@ initial[::n] = 1/n  # one column initial guess
 
 # Measurement and actual movements
 for t in range(T):
-    locs[t] = house.getLocation()
+    locs[t] = house.get_location()
     movements[:, :, t] = house.floor
     observations[t] = numpy.random.choice(range(4), size=[1], p=hmm.ep[:, locs[t]])[0]
     house.move()

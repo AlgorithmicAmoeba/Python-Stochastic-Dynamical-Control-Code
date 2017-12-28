@@ -12,7 +12,7 @@ params = params.Params(tend)
 
 xspace = [0.0, 1.0]
 yspace = [250, 650]
-linsystems = params.cstr_model.getLinearSystems_randomly(0, xspace, yspace, params.h)
+linsystems = params.cstr_model.get_linear_systems_randomly(0, xspace, yspace, params.h)
 
 
 mpl.rc("font", family="serif", serif="Computer Modern", size=12)

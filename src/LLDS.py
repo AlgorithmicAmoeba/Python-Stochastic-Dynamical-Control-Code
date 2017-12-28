@@ -1,7 +1,7 @@
 import numpy
 
 
-class llds:
+class LLDS:
     # Assume zero mean transition and emission defs.
     # The linear latent dynamical system should have the
     # state space form:

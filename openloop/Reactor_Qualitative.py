@@ -8,10 +8,10 @@ import scipy.optimize
 import sys
 
 sys.path.append('../')
-import openloop.params as Params
+import openloop.params as parameters
 
 tend = 150
-params = Params.Params(tend)
+params = parameters.Params(tend)
 N = 100
 Ts = numpy.linspace(200, 600, N)  # temperature range
 qrs1 = numpy.zeros(N)  # heat removals
@@ -20,10 +20,10 @@ qrs3 = numpy.zeros(N)  # heat removals
 qgs1 = numpy.zeros(N)  # heat generations
 
 for k in range(N):
-    qrs1[k] = params.cstr_model.QR(Ts[k], -906.)
-    qrs2[k] = params.cstr_model.QR(Ts[k], 0.0)
-    qrs3[k] = params.cstr_model.QR(Ts[k], 1145.0)
-    qgs1[k] = params.cstr_model.QG(Ts[k])
+    qrs1[k] = params.cstr_model.qr(Ts[k], -906.)
+    qrs2[k] = params.cstr_model.qr(Ts[k], 0.0)
+    qrs3[k] = params.cstr_model.qr(Ts[k], 1145.0)
+    qgs1[k] = params.cstr_model.qg(Ts[k])
 
 
 mpl.rc("font", family="serif", serif="Computer Modern", size=12)

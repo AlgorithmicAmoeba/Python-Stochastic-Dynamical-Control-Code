@@ -8,7 +8,7 @@ sys.path.append('../')
 import src.Ellipse as Ellipse
 
 
-def plotTracking(ts, xs, ys, fmeans, us, obs, setpoint):
+def plot_tracking(ts, xs, ys, fmeans, us, obs, setpoint):
 
     tend = ts[-1]
     setpoints = numpy.ones(len(ts))*setpoint
@@ -60,7 +60,7 @@ def plotTracking(ts, xs, ys, fmeans, us, obs, setpoint):
     plt.xlabel("Time [min]")
 
 
-def plotTracking(ts, xs, ys, fmeans, us, obs):
+def plot_tracking(ts, xs, ys, fmeans, us, obs):
     tend = ts[-1]
 
     umax = max(abs(us))
@@ -110,7 +110,7 @@ def plotTracking(ts, xs, ys, fmeans, us, obs):
     plt.xlabel("Time [min]")
     
 
-def plotStateSpaceSwitch(linsystems, xs):
+def plot_state_space_switch(linsystems, xs):
     mpl.rc("font", family="serif", serif="Computer Modern", len=12)
     mpl.rc("text", usetex=True)
     plt.figure()  # Model and state space
@@ -131,7 +131,7 @@ def plotStateSpaceSwitch(linsystems, xs):
     plt.ylabel(r"T$_R$ [K]")
     
 
-def plotSwitchSelection(numSwitches, strack, ts, cbaron):
+def plot_switch_selection(numSwitches, strack, ts, cbaron):
 
     plt.figure()  # Model selection
     mpl.rc("font", family="serif", serif="Computer Modern", len=12)
@@ -165,7 +165,7 @@ def plotSwitchSelection(numSwitches, strack, ts, cbaron):
     plt.xlabel("Time [min]")
 
 
-def plotEllipses1(ts, xs, fmeans, fcovars, fname, legloc):
+def plot_ellipses1(ts, xs, fmeans, fcovars, fname, legloc):
 
     mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
@@ -187,7 +187,7 @@ def plotEllipses1(ts, xs, fmeans, fcovars, fname, legloc):
     plt.legend([x1, f1, b1], ["Underlying model", "Filtered mean", r"90$\%$ Confidence region"], loc=legloc)
 
 
-def plotEllipses2(ts, xs, fmeans, fcovars, fname, line, sp, nf, sigma, pick, legloc):
+def plot_ellipses2(ts, xs, fmeans, fcovars, fname, line, sp, nf, sigma, pick, legloc):
 
     mpl.rc("font", family="serif", serif="Computer Modern", len=12)
     mpl.rc("text", usetex=True)
@@ -234,7 +234,7 @@ def plotEllipses2(ts, xs, fmeans, fcovars, fname, line, sp, nf, sigma, pick, leg
         plt.legend([x1, f1, b1], ["Underlying model", "Filtered mean", r"99.99$\%$ Confidence region"], loc=legloc)
 
 
-def plotEllipseComp(f1means, f1covars, f2means, f2covars, xs, ts, sigma=4.605):
+def plot_ellipse_comp(f1means, f1covars, f2means, f2covars, xs, ts, sigma=4.605):
 
     N = len(ts)
     skip = int(len(ts)/30)
@@ -262,7 +262,7 @@ def plotEllipseComp(f1means, f1covars, f2means, f2covars, xs, ts, sigma=4.605):
     plt.legend([x1, f1, f2, b1, b2], ["Underlying model", "Particle filter", "Kalman filter", r"PF 90$\%$ Confidence region", r"KF 90$\%$ Confidence region"], loc="best")
 
 
-def plotTrackingBreak(ts, xs, xsb, ys, fmeans, obs):
+def plot_tracking_break(ts, xs, xsb, ys, fmeans, obs):
 
     tend = ts[-1]
     skipm = int(len(ts)/80)
@@ -296,7 +296,7 @@ def plotTrackingBreak(ts, xs, xsb, ys, fmeans, obs):
     plt.xlim([0, tend])
     
 
-def plotTrackingTwoFilters(ts, xs, ys, f1means, f2means):
+def plot_tracking_two_filters(ts, xs, ys, f1means, f2means):
 
     skipm = int(len(ts)/80)
     skip = int(len(ts)/40)
@@ -323,7 +323,7 @@ def plotTrackingTwoFilters(ts, xs, ys, f1means, f2means):
     plt.xlim([0, tend])
     
 
-def plotKLdiv(ts, kldiv, basediv, unidiv, logged):
+def plot_kl_div(ts, kldiv, basediv, unidiv, logged):
     mpl.rc("font", family="serif", serif="Computer Modern", len=12)
     mpl.rc("text", usetex=True)
 
@@ -342,7 +342,7 @@ def plotKLdiv(ts, kldiv, basediv, unidiv, logged):
     plt.legend([kl, gd, ud], ["Approximation", "Baseline", "Uniform"], loc="best")
     
 
-def calcError(x, y):
+def calc_error(x, y):
 
     r, N = x.shape
     avediff1 = (1/N)*sum([abs((xt-yt) / xt) for xt, yt in zip(x[0], y[0])])*100
@@ -353,7 +353,7 @@ def calcError(x, y):
     return avediff1, avediff2
 
 
-def calcError1(x, y):
+def calc_error1(x, y):
 
     r, N = numpy.shape(x)
     print(numpy.shape(x[0]))
@@ -364,7 +364,7 @@ def calcError1(x, y):
     return avediff1
 
 
-def calcError2(x, y):
+def calc_error2(x, y):
 
     r, N = len(x)
     avediff1 = (1/N)*sum(abs((x[0] - y)/y))*100
@@ -372,7 +372,7 @@ def calcError2(x, y):
     return avediff1
 
 
-def calcError3(x, y):
+def calc_error3(x, y):
 
     N = len(x)
     avediff1 = (1/N)*sum(abs((x - y)/y))*100
@@ -380,14 +380,14 @@ def calcError3(x, y):
     return avediff1
 
 
-def calcEnergy(us, uss):
+def calc_energy(us, uss):
     N = len(us)
     avecost = (1/(60*N))*sum(abs(us-uss))
     print("Average Input (kW): ", avecost)
     return avecost
 
 
-def checkConstraint(ts, xs, line):
+def check_constraint(ts, xs, line):
     # line = [b, c] => y + bx + c = 0
     # line => y = - bx - c
     r, N = len(xs)
@@ -419,7 +419,7 @@ def checkConstraint(ts, xs, line):
     plt.ylabel(r"Clearance")
     
 
-def getMCRes(xs, sigmas, line, mcdistmat, counter, h):
+def get_mc_res(xs, sigmas, line, mcdistmat, counter, h):
     # line = [b, c] => y + bx + c = 0
     # line => y = - bx - c
     d = [line[0], 0]

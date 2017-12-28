@@ -14,12 +14,12 @@ class House:
         self.floor = numpy.zeros([n, n])
         self.floor[self.burglar//n][self.burglar % n] = 1
 
-    def createHMM(self):
+    def create_hmm(self):
         tp = numpy.zeros([self.n**2, self.n**2])
         ep = numpy.zeros([4, self.n**2])
         # Transmission probability tables
         for col in range(self.n**2):
-            legalMoves = self.getLegalMoves(col)
+            legalMoves = self.get_legal_moves(col)
             prob = 1/len(legalMoves)
             for row in range(self.n**2):
                 if row in legalMoves:
@@ -51,7 +51,7 @@ class House:
 
         return HMM.HMM(tp, ep)
 
-    def getLegalMoves(self, k):
+    def get_legal_moves(self, k):
         # Returns an array of legal moves
         moves = []
         loc = k
@@ -69,10 +69,10 @@ class House:
 
     def move(self):
         # Move the burglar
-        moves = self.getLegalMoves(self.burglar)
+        moves = self.get_legal_moves(self.burglar)
         self.floor[self.burglar//self.n][self.burglar % self.n] = 0
         self.burglar = moves[int(random.random()*len(moves))]
         self.floor[self.burglar//self.n][self.burglar % self.n] = 1
 
-    def getLocation(self):
+    def get_location(self):
         return self.burglar

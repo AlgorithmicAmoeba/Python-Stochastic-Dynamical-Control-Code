@@ -60,17 +60,17 @@ class Reactor:
         J22 = -(self.F/self.V + self.dH/(self.rho*self.Cp)*self.k0*numpy.exp(-self.E/(self.R*x[1]))*(self.E/(self.R*x[1]**2))*x[0])
         return numpy.array([[J11, J12], [J21, J22]])
 
-    def QG(self, T):
+    def qg(self, T):
         # Return the evaluated heat generation term.
         ca = self.F/self.V*self.CA0/(self.F/self.V + self.k0*numpy.exp(-self.E/(self.R*T)))
         qg = -self.dH/(self.rho*self.Cp)*self.k0*numpy.exp(-self.E/(self.R*T))*ca
         return qg
 
-    def CA(self, T):
+    def ca(self, T):
         ca = self.F/self.V*self.CA0/(self.F/self.V + self.k0*numpy.exp(-self.E/(self.R*T)))
         return ca
 
-    def QR(self, T, Q):
+    def qr(self, T, Q):
         # Return the evaluated heat removal term.
         qr = - self.F/self.V*(self.TA0 - T) - Q/(self.rho * self.V * self.Cp)
         return qr
@@ -136,7 +136,7 @@ class Reactor:
         operatingpoints[:, k+2] = [0.9996453064079288, 310.07093871841454]
         return operatingpoints
 
-    def getLinearSystems(self, nX, nY, xspace, yspace, h):
+    def get_linear_systems(self, nX, nY, xspace, yspace, h):
         # Returns an array of linearised systems
 
         N = nX*nY + 3  # add the three nominal operating points
@@ -149,7 +149,7 @@ class Reactor:
             
         return linsystems
 
-    def getLinearSystems_randomly(self, npoints, xspace, yspace, h):
+    def get_linear_systems_randomly(self, npoints, xspace, yspace, h):
         # Returns an array of linearised systems
 
         N = npoints + 3  # add the three nominal operating points
@@ -162,7 +162,7 @@ class Reactor:
 
         return linsystems
 
-    def getNominalLinearSystems(self, h):
+    def get_nominal_linear_systems(self, h):
         # Returns an array of linearised systems
 
         linsystems = [None]*3

@@ -16,13 +16,13 @@ params = openloop.params.Params(tend)
 init_state = [0.5, 400]
 
 # Specify the linear model
-linsystems = params.cstr_model.getNominalLinearSystems(params.h)
+linsystems = params.cstr_model.get_nominal_linear_systems(params.h)
 opoint = 1  # which nominal model to use
 A = linsystems[opoint].A
 B = linsystems[opoint].B
 b = linsystems[opoint].b
 
-lin_cstr = LLDS.llds(A, B, params.C1, params.Q, params.R1)  # KF object
+lin_cstr = LLDS.LLDS(A, B, params.C1, params.Q, params.R1)  # KF object
 
 # Plant initialisation
 params.xs[:, 0] = init_state
@@ -55,9 +55,9 @@ for i in range(len(params.linxs[0])):
 
 # Plot results
 
-Results.plotEllipses1(params.ts, params.xs, kfmeans, kfcovars, "Kalman Filter", "upper right")
+Results.plot_ellipses1(params.ts, params.xs, kfmeans, kfcovars, "Kalman Filter", "upper right")
 
-Results.plotTracking(params.ts, params.xs, params.ys1, kfmeans, params.us, 1)
+Results.plot_tracking(params.ts, params.xs, params.ys1, kfmeans, params.us, 1)
 
 plt.show()
-avediff = Results.calcError(params.xs, kfmeans)
+avediff = Results.calc_error(params.xs, kfmeans)
