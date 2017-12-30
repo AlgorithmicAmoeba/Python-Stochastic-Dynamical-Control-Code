@@ -117,7 +117,7 @@ class LLDS:
 
         for k in range(1, n):  # cast the state forward
             temp = self.step_predict(predicted_means[:, k-1], predicted_covars[:, :, k-1], us[k])
-            predicted_means[:, k], predicted_covars[:, :, k]
+            predicted_means[:, k], predicted_covars[:, :, k] = temp
 
         return predicted_means, predicted_covars
 

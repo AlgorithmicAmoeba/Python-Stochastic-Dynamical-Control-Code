@@ -5,9 +5,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy
 import scipy.optimize
-import sys
-
-sys.path.append('../')
 import openloop.params as parameters
 
 tend = 150

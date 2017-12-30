@@ -2,9 +2,6 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy
-import sys
-
-sys.path.append('../')
 import openloop.params as params
 
 tend = 50
@@ -21,9 +18,7 @@ plt.figure(1)
 k = 2   # set which operating point to use
 # also remember to change +- on line 47 and the SS points on lines 75-81
 nDD = 2
-x1 = 0   # legend var
-x2 = 0   # legend var
-x3 = 0   # legend var
+
 for dd in range(nDD):   # only loop through
     initial_states = linsystems[k].op + (numpy.random.random([2])*2-1)*[0.01, 10]*(dd+1)
 
@@ -41,8 +36,8 @@ for dd in range(nDD):   # only loop through
         linxs[:, i] += linsystems[k].b
     
     plt.subplot(nDD, 1, dd+1)
-    plt.plot(xs[0], xs[1], "k", linewidth=3)
-    plt.plot(linxs[0], linxs[1], "r--", linewidth=3)
+    x1, = plt.plot(xs[0], xs[1], "k", linewidth=3)
+    x2, = plt.plot(linxs[0], linxs[1], "r--", linewidth=3)
     plt.plot(xs[0][0], xs[1][0], "ko", markersize=10, markeredgewidth=4)
     plt.plot(xs[0][-1], xs[1][-1], "kx", markersize=10, markeredgewidth=4)
     plt.plot(linxs[0][0], linxs[1][0], "ro", markersize=10, markeredgewidth=4)
@@ -61,7 +56,7 @@ for dd in range(nDD):   # only loop through
         ss3 = [0.9996, 310.0709]
         x3, = plt.plot(ss3[0], ss3[1], "gx", markersize=10, markeredgewidth=4)
 
-plt.legend([x1, x2, x3], ["Nonlinear model", "Linear model", "Operating point"], loc="best")
-plt.xlabel(r"C$_A$ [kmol.m$^{-3}$]")
-plt.locator_params(nbins=6)
-plt.show()
+    plt.legend([x1, x2, x3], ["Nonlinear model", "Linear model", "Operating point"], loc="best")
+    plt.xlabel(r"C$_A$ [kmol.m$^{-3}$]")
+    plt.locator_params(nbins=6)
+    plt.show()

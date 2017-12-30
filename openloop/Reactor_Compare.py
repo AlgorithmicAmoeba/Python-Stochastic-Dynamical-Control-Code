@@ -4,9 +4,6 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy
-import sys
-
-sys.path.append('../')
 import openloop.params as params
 
 tend = 300

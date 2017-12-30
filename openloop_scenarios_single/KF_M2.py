@@ -1,12 +1,7 @@
 # Inference using one linear model measuring only temperature
 
-
-import sys
-
 import matplotlib.pyplot as plt
 import numpy
-
-sys.path.append('../')
 import openloop.params
 import src.LLDS as LLDS
 import src.Results as Results

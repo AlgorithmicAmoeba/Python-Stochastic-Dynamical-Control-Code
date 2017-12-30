@@ -2,9 +2,6 @@
 
 # All the required modules
 import numpy
-import sys
-
-sys.path.append('../')
 import src.Reactor as Reactor
 
 

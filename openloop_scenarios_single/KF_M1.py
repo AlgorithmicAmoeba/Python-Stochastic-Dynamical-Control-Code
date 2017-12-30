@@ -3,12 +3,10 @@
 
 import matplotlib.pyplot as plt
 import numpy
-import sys
-
-sys.path.append('../')
 import openloop.params
 import src.LLDS as LLDS
 import src.Results as Results
+
 
 tend = 50
 
