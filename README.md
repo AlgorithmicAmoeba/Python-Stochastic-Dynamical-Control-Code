@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/darren-roos/Python-Stochastic-Dynamical-Control-Code.svg?branch=master)](https://travis-ci.org/darren-roos/Python-Stochastic-Dynamical-Control-Code)
+
 # Install instructions
 
 First prepare your environment
