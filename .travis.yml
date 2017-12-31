@@ -11,7 +11,10 @@ before_install:
   - conda update -q  -y conda
 
 install:
-  - conda create -y -n test-environment python=$TRAVIS_PYTHON_VERSION matplotlib=2.1.0 numpy=1.13.3 scipy=0.19.1
+  - conda create -q -y -n test-environment python=$TRAVIS_PYTHON_VERSION
+  - conda install matplotlib=2.1.0
+  - conda install numpy=1.13.3
+  - conda install scipy=0.19.1
   - source activate test-environment
 
 script:
