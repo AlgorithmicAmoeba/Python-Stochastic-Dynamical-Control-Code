@@ -6,7 +6,9 @@ First prepare your environment
 
 Install [Anaconda with python 3.6](https://conda.io/docs/user-guide/install/index.html) (preferably 64-bit version, if possible)
 
-(Will add conda environment specs once coding has been done, for now the default one works)
+Create a dedicated conda environment:
+
+    conda create -n stochastic-models python=3.6 matplotlib=2.1.0 numpy=1.13.3 scipy=0.19.1
 
 Install pyCharm community version from [their website](https://www.jetbrains.com/pycharm/download/#section=linux) 
 OR use the snap tool: 
@@ -26,3 +28,11 @@ install git:
 Clone the repo: 
 
     git clone https://github.com/darren-roos/Python-Stochastic-Dynamical-Control-Code.git
+
+In PyCharm, set the python environment to the one create above:
+1. Open the Python-Stochastic-Dynamical-Control-Code project in PyCharm
+2. Go to the Project Structure menu (Shortcut: Ctrl+Alt+S)
+3. Open the Project Interpreter Tab
+4. Click the small cog icon and select Add Local
+5. Select Conda Environment and then select existing environment
+6. Locate the stochastic-models environment (should be in the /envs directory of your Anaconda install path)
