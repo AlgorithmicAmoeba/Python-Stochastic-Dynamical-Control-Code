@@ -1,0 +1,5 @@
+name: test-environment
+dependencies:
+  - matplotlib
+  - numpy
+  - scipy

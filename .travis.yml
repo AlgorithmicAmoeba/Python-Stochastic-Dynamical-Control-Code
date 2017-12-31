@@ -20,7 +20,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -y -n test-environment python=$TRAVIS_PYTHON_VERSION matplotlib=2.1.0 numpy=1.13.3 scipy=0.19.1
+  - conda create -q -y -n test-environment python=$TRAVIS_PYTHON_VERSION -f environment.yml
   - source activate test-environment
 
 script:
