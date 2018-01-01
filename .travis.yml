@@ -25,4 +25,5 @@ install:
   - source activate test-environment
 
 script:
-  py.test test
+  - conda env export  # Debug
+  - py.test test
