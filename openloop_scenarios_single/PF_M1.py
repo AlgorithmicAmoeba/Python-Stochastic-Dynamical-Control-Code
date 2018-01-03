@@ -37,8 +37,8 @@ params.pfmeans[:, 0], params.pfcovars[:, :, 0] = PF.get_stats(particles)
 # Loop through the rest of time
 for t in range(1, params.N):
     params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h, )
-    params.xs[:, t] += state_noise_dist.rsv()  # actual plant
-    params.ys1[t] = params.C1 @ params.xs[:, t] + meas_noise_dist.rsv()  # measured from actual plant
+    params.xs[:, t] += state_noise_dist.rvs()  # actual plant
+    params.ys1[t] = params.C1 @ params.xs[:, t] + meas_noise_dist.rvs()  # measured from actual plant
     PF.pf_filter(particles, params.us[t-1], params.ys1[t], state_noise_dist, meas_noise_dist, cstr_pf)
     params.pfmeans[:, t], params.pfcovars[:, :, t] = PF.get_stats(particles)
 

@@ -102,7 +102,7 @@ def pf_filter(particles, u, y, plantdist, measuredist, model):
     nX, N = particles.x.shape
 
     for p in range(N):
-        noise = plantdist.rsv()
+        noise = plantdist.rvs()
         particles.x[:, p] = model.f(particles.x[:, p], u, noise)  # predict
         particles.w[p] *= measuredist.pdf(y - model.g(particles.x[:, p]))  # weight of each particle
 
@@ -121,8 +121,8 @@ def pf_filter(particles, u, y, plantdist, measuredist, model):
 
 def get_stats(particles):
     """Return the Gaussian statistics of the particles"""
-    mean = numpy.average(particles.x, weights=particles.w)
-    cov = numpy.cov(particles.x, fweights=particles.w)
+    mean = numpy.average(particles.x, weights=particles.w, axis=1)
+    cov = numpy.cov(particles.x, aweights=particles.w)
     return mean, cov
 
 
@@ -132,5 +132,5 @@ def predict(parts, u, plantdist, model):
 
     nX, nP = parts.shape
     for p in range(nP):
-        noise = plantdist.rsv()
+        noise = plantdist.rvs()
         parts[:, p] = model.f(parts[:, p], u, noise)  # predict
