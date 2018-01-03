@@ -6,6 +6,7 @@ import numpy
 import openloop.params
 import src.LLDS as LLDS
 import src.Results as Results
+import scipy.stats
 
 
 tend = 50
@@ -38,12 +39,12 @@ init_mean = init_state - b
 
 # First time step
 kfmeans[:, 0], kfcovars[:, :, 0] = lin_cstr.init_filter(init_mean, params.init_state_covar, params.ys1[0]-b[1])
+state_noise_dist = scipy.stats.multivariate_normal(cov=params.Q)  # state distribution
+meas_noise_dist = scipy.stats.multivariate_normal(cov=params.R1)  # measurement distribution
 
 for t in range(1, params.N):
-    state_noise_dist = numpy.random.multivariate_normal(numpy.zeros([len(params.Q)]), params.Q)
-    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist
-    meas_noise_dist = numpy.random.normal(0, numpy.sqrt(params.R1[0]))
-    params.ys1[t] = params.C1 @ params.xs[:, t] + meas_noise_dist  # measured from actual plant
+    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist.rvs()
+    params.ys1[t] = params.C1 @ params.xs[:, t] + meas_noise_dist.rvs()  # measured from actual plant
     params.linxs[:, t], _ = lin_cstr.step(params.linxs[:, t-1], params.us[t-1])
     temp = lin_cstr.step_filter(kfmeans[:, t-1], kfcovars[:, :, t-1], params.us[t-1], params.ys1[t] - b[1])
     kfmeans[:, t], kfcovars[:, :, t] = temp
