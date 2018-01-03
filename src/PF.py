@@ -30,7 +30,7 @@ def init_pf(dist, nP, xN):
     for p in range(nP):
         draw_x = dist.rvs()  # draw from the proposed prior
         particles.x[:, p] = draw_x
-        particles.w[p] = 1./nP  # uniform initial weight
+        particles.w[p] = 1/nP  # uniform initial weight
 
     return particles
 
@@ -74,7 +74,7 @@ def roughen(particles):
 
 def resample(particles):
     N = len(particles.w)
-    rs = numpy.random.choice(range(N), size=[N], p=particles.w)[0]  # draw N samples from weighted Categorical
+    rs = numpy.random.choice(range(N), size=N, p=particles.w)  # draw N samples from weighted Categorical
     copy_particles = copy.copy(particles.x)
     for p in range(N):  # resample
         particles.x[:, p] = copy_particles[:, rs[p]]
