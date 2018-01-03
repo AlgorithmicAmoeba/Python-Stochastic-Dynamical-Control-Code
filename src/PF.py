@@ -28,7 +28,7 @@ def init_pf(dist, nP, xN):
 
     particles = Particles(numpy.zeros([xN, nP]), numpy.zeros(nP))
     for p in range(nP):
-        draw_x = dist.rsv()  # draw from the proposed prior
+        draw_x = dist.rvs()  # draw from the proposed prior
         particles.x[:, p] = draw_x
         particles.w[p] = 1./nP  # uniform initial weight
 

@@ -31,7 +31,7 @@ meas_noise_dist = scipy.stats.multivariate_normal(params.R1)  # measurement dist
 
 # Time step 1
 params.xs[:, 0] = init_state
-params.ys1[0] = numpy.array([0.0, 1.0]) @ params.xs[:, 0] + meas_noise_dist.rsv()  # measured from actual plant
+params.ys1[0] = numpy.array([0.0, 1.0]) @ params.xs[:, 0] + meas_noise_dist.rvs()  # measured from actual plant
 PF.init_filter(particles, params.ys1[0], meas_noise_dist, cstr_pf)
 params.pfmeans[:, 0], params.pfcovars[:, :, 0] = PF.get_stats(particles)
 # Loop through the rest of time
