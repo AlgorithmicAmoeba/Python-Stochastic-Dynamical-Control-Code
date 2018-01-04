@@ -108,7 +108,7 @@ def plot_tracking(ts, xs, ys, fmeans, us, obs):
     
 
 def plot_state_space_switch(linsystems, xs):
-    mpl.rc("font", family="serif", serif="Computer Modern", len=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
     plt.figure()  # Model and state space
     for k in range(len(linsystems)):
@@ -116,7 +116,7 @@ def plot_state_space_switch(linsystems, xs):
         plt.annotate(r"M_k",
                      xy=[linsystems[k].op[0], linsystems[k].op[1]],
                      xytext=[linsystems[k].op[0], linsystems[k].op[1]],
-                     fontlen=12.0,
+                     fontsize=12.0,
                      ha="center",
                      va="bottom")
         
@@ -131,7 +131,7 @@ def plot_state_space_switch(linsystems, xs):
 def plot_switch_selection(numSwitches, strack, ts, cbaron):
 
     plt.figure()  # Model selection
-    mpl.rc("font", family="serif", serif="Computer Modern", len=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
     axes = [None]*numSwitches
     im = 0
@@ -188,7 +188,7 @@ def plot_ellipses1(ts, xs, fmeans, fcovars, legloc):
 
 def plot_ellipses2(ts, xs, fmeans, fcovars,  line, sp, nf, sigma, pick, legloc):
 
-    mpl.rc("font", family="serif", serif="Computer Modern", len=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
     N = len(ts)
     skip = int(len(ts)/40)
@@ -238,7 +238,7 @@ def plot_ellipse_comp(f1means, f1covars, f2means, f2covars, xs, ts, sigma=4.605)
     N = len(ts)
     skip = int(len(ts)/30)
     plt.figure()
-    mpl.rc("font", family="serif", serif="Computer Modern", len=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
     x1, = plt.plot(xs[0], xs[1], "k", linewidth=3)
     f1, = plt.plot(f1means[0][::skip], f1means[1][::skip], "yx", markersize=5, markeredgewidth=2)
@@ -267,7 +267,7 @@ def plot_tracking_break(ts, xs, xsb, ys, fmeans, obs):
     tend = ts[-1]
     skipm = int(len(ts)/80)
     plt.figure()  # plt.plot filtered results
-    mpl.rc("font", family="serif", serif="Computer Modern", len=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
     plt.subplot(2, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
@@ -302,7 +302,7 @@ def plot_tracking_two_filters(ts, xs, ys, f1means, f2means):
     skip = int(len(ts)/40)
     tend = ts[-1]
     plt.figure()  # plt.plot filtered results
-    mpl.rc("font", family="serif", serif="Computer Modern", len=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
     plt.subplot(2, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
@@ -324,7 +324,7 @@ def plot_tracking_two_filters(ts, xs, ys, f1means, f2means):
     
 
 def plot_kl_div(ts, kldiv, basediv, unidiv, logged):
-    mpl.rc("font", family="serif", serif="Computer Modern", len=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
 
     plt.figure()
@@ -410,7 +410,7 @@ def check_constraint(ts, xs, line):
     print("Minimum Negative Clearance: ", minneg)
 
     plt.figure()
-    mpl.rc("font", family="serif", len=12)
+    mpl.rc("font", family="serif", size=12)
     mpl.rc("text", usetex=True)
 
     plt.plot(ts, numpy.zeros([N]), "r", linewidth=1)
