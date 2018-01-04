@@ -39,7 +39,8 @@ init_mean = init_state - b
 kfmeans[:, 0], kfcovars[:, :, 0] = lin_cstr.init_filter(init_mean, params.init_state_covar, params.ys2[:, 0]-b)
 
 for t in range(1, params.N):
-    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist.rvs()
+    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+    params.xs[:, t] += state_noise_dist.rvs()
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measured from actual plant
     params.linxs[:, t], _ = lin_cstr.step(params.linxs[:, t-1], params.us[t-1])
     temp = lin_cstr.step_filter(kfmeans[:, t-1], kfcovars[:, :, t-1], params.us[t-1], params.ys2[:, t] - b)
