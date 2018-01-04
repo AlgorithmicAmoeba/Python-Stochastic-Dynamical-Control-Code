@@ -28,9 +28,9 @@ params.xs[:, 0] = init_state
 params.linxs[:, 0] = init_state - b
 
 # Simulate plant
-state_noise_dist = numpy.random.multivariate_normal(numpy.zeros([len(params.Q)]), params.Q)
-meas_noise_dist = numpy.random.normal(0, numpy.sqrt(params.R1[0]))
-params.ys1[0] = params.C1 @ params.xs[:, 0] + meas_noise_dist  # measure from actual plant
+state_noise_dist = scipy.stats.multivariate_normal(cov=params.Q)  # state distribution
+meas_noise_dist = scipy.stats.multivariate_normal(cov=params.R1)  # measurement distribution
+params.ys1[0] = params.C1 @ params.xs[:, 0] + meas_noise_dist.rvs()  # measure from actual plant
 
 # Filter setup
 kfmeans = numpy.zeros([2, params.N])
@@ -39,11 +39,11 @@ init_mean = init_state - b
 
 # First time step
 kfmeans[:, 0], kfcovars[:, :, 0] = lin_cstr.init_filter(init_mean, params.init_state_covar, params.ys1[0]-b[1])
-state_noise_dist = scipy.stats.multivariate_normal(cov=params.Q)  # state distribution
-meas_noise_dist = scipy.stats.multivariate_normal(cov=params.R1)  # measurement distribution
+
 
 for t in range(1, params.N):
-    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist.rvs()
+    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+    params.xs[:, t] += state_noise_dist.rvs()
     params.ys1[t] = params.C1 @ params.xs[:, t] + meas_noise_dist.rvs()  # measured from actual plant
     params.linxs[:, t], _ = lin_cstr.step(params.linxs[:, t-1], params.us[t-1])
     temp = lin_cstr.step_filter(kfmeans[:, t-1], kfcovars[:, :, t-1], params.us[t-1], params.ys1[t] - b[1])
