@@ -71,7 +71,6 @@ for i in range(len(kfmeans[0])):
     kfmeans[:, i] += b
 
 # Plot Results
-Results.plot_ellipses1(params.ts, params.xs, kfmeans, kfcovars, "lower left")
 Results.plot_ellipse_comp(pfmeans, pfcovars, kfmeans, kfcovars, params.xs, params.ts)
 
 Results.plot_tracking_two_filters(params.ts, params.xs, params.ys2, pfmeans, kfmeans)
