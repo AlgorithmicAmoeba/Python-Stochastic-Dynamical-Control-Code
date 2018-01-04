@@ -16,7 +16,7 @@ init_state = numpy.array([0.5, 400])
 
 # Specify the linear model
 lin_systems = params.cstr_model.get_nominal_linear_systems(params.h)
-o_point = 2
+o_point = 1
 A = lin_systems[o_point].A
 B = lin_systems[o_point].B
 b = lin_systems[o_point].b
