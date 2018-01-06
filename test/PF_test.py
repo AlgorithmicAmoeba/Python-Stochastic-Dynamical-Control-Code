@@ -68,7 +68,7 @@ meas_covar[1, 1] = 10.
 meas_dist = scipy.stats.multivariate_normal(cov=meas_covar)  # measurement distribution
 
 
-def filter_test():
+def test_filter():
     particles = PF.init_pf(init_dist, nP, 2)  # initialise the particles
     fmeans = numpy.zeros([2, N])
     fcovars = numpy.zeros([2, 2, N])
@@ -89,4 +89,4 @@ def filter_test():
 
 
 if __name__ == '__main__':
-    filter_test()
+    test_filter()

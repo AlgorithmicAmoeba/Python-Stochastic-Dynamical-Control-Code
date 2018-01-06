@@ -23,7 +23,7 @@ xs = numpy.zeros([2, N])
 initial_states = [0.57, 395]
 
 
-def simulation_test():
+def test_simulation():
     xs[:, 0] = initial_states
     # Loop through the rest of time
     for t in range(1, N):
@@ -34,4 +34,4 @@ def simulation_test():
 
 
 if __name__ == '__main__':
-    simulation_test()
+    test_simulation()

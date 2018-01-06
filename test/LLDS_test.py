@@ -63,7 +63,7 @@ else:
 tol = 0.01
 
 
-def filter_test():
+def test_filter():
     ucontrol = numpy.zeros(1)  # no control so this is really only a dummy variable.
     filtermeans_own = numpy.zeros([6, T])
     filtercovar_own = numpy.zeros([6, 6, T])
@@ -79,10 +79,10 @@ def filter_test():
     return filtermeans_own, filtercovar_own
 
 
-def smooth_test():
+def test_smooth():
     ucontrols = numpy.zeros([1, T])  # no control so this is really only a dummy variable.
 
-    filtermeans_own, filtercovar_own = filter_test()
+    filtermeans_own, filtercovar_own = test_filter()
 
     smoothedmeans_own, smoothedcovar_own = model.smooth(filtermeans_own, filtercovar_own, ucontrols)
 
@@ -92,5 +92,5 @@ def smooth_test():
 
 
 if __name__ == '__main__':
-    filter_test()
-    smooth_test()
+    test_filter()
+    test_smooth()
