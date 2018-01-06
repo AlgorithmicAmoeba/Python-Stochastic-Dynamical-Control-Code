@@ -32,24 +32,25 @@ mod1 = HMM.HMM(A, B)  # create the HMM object
 initial = numpy.array([0.9, 0.1, 0.0])  # initial state distribution
 evidence = numpy.array([0, 0, 1, 0, 1, 0, 1])  # evidence/observations
 
-filter_me = mod1.forward(initial, evidence)
 
-fbs_me = numpy.zeros([len(initial), len(evidence)])
-for k in range(len(evidence)):
-    fbs_me[:, k] = mod1.smooth(initial, evidence, k)  # works!
+def filter_test():
+    filter_me = mod1.forward(initial, evidence)
+    assert abs(filter_me - filter_barber).max() < 1e-4
 
-vtb_me = mod1.viterbi_dp(initial, evidence)  # works!
-vtb_barber = [0, 2, 2, 2, 2, 2, 2]  # Barber's answer
 
-p_states, p_evidence = mod1.prediction(initial, evidence)  # No test for this - not implemented by barber
+def smooth_test():
+    fbs_me = numpy.zeros([len(initial), len(evidence)])
+    for k in range(len(evidence)):
+        fbs_me[:, k] = mod1.smooth(initial, evidence, k)  # works!
+    assert abs(fbs_me - fbs_barber).max() < 1e-4
 
-# Run the tests
-# Viterbi Inference
-assert numpy.array_equal(vtb_me, vtb_barber)
 
-# Filter Inference
-assert abs(filter_me - filter_barber).max() < 1e-4
+def viterbi_test():
+    vtb_me = mod1.viterbi_dp(initial, evidence)  # works!
+    vtb_barber = [0, 2, 2, 2, 2, 2, 2]  # Barber's answer
+    assert numpy.array_equal(vtb_me, vtb_barber)
 
-# Smoother Inference
-assert abs(fbs_me - fbs_barber).max() < 1e-4
 
+def prediction_test():
+    mod1.prediction(initial, evidence)  # No test for this - not implemented by barber
+    assert True
