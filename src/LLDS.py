@@ -59,7 +59,7 @@ class LLDS:
         else:
             updatedMean = pmean + (kalmanGain @ (ymeas - ypred)).T
         rows, cols = numpy.shape(pvar)
-        updatedVar = (numpy.eye(rows) - kalmanGain*self.C) @ pvar
+        updatedVar = (numpy.eye(rows) - kalmanGain @ self.C) @ pvar
         return updatedMean, updatedVar
 
     def smooth(self, kmeans, kcovars, us):
@@ -74,12 +74,12 @@ class LLDS:
         for t in range(cols-2, 1, -1):
             Pt = self.A*kcovars[:, :, t]*numpy.transpose(self.A) + self.Q
             Jt = kcovars[:, :, t]*numpy.transpose(self.A)*numpy.linalg.inv(Pt)
-            smoothedmeans[:, t] = kmeans[:, t] + Jt*(smoothedmeans[:, t+1] - self.A*kmeans[:, t] - self.B*us[:, t-1])
+            smoothedmeans[:, t] = kmeans[:, t] + Jt @ (smoothedmeans[:, t+1] - self.A @ kmeans[:, t] - self.B*us[:, t-1])
             smoothedvars[:, :, t] = kcovars[:, :, t] + Jt*(smoothedvars[:, :, t+1] - Pt)*numpy.transpose(Jt)
 
         Pt = self.A*kcovars[:, :, 0]*numpy.transpose(self.A) + self.Q
         Jt = kcovars[:, :, 0]*numpy.transpose(self.A)*numpy.linalg.inv(Pt)
-        smoothedmeans[:, 0] = kmeans[:, 0] + Jt*(smoothedmeans[:, 1] - self.A*kmeans[:, 0])  # no control for the prior
+        smoothedmeans[:, 0] = kmeans[:, 0] + Jt @ (smoothedmeans[:, 1] - self.A @ kmeans[:, 0])  # no control for the prior
         smoothedvars[:, :, 0] = kcovars[:, :, 0] + Jt*(smoothedvars[:, :, 1] - Pt)*numpy.transpose(Jt)
 
         return smoothedmeans, smoothedvars
