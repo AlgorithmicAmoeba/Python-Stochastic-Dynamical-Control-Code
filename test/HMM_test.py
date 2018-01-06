@@ -14,10 +14,16 @@
 import src.HMM as HMM
 import pandas
 import numpy
+import pathlib
 
-fbs_barber = pandas.read_csv("smooth_hmm.csv", header=None).as_matrix()  # read in the ideal answers
-filter_barber = pandas.read_csv("filter_hmm.csv", header=None).as_matrix()  # read in the ideal answers
-
+smooth_path = pathlib.Path("smooth_hmm.csv")
+filter_path = pathlib.Path("filter_hmm.csv")
+if smooth_path.is_file():
+    fbs_barber = pandas.read_csv("smooth_hmm.csv", header=None).as_matrix()  # read in the ideal answers
+    filter_barber = pandas.read_csv("filter_hmm.csv", header=None).as_matrix()  # read in the ideal answers
+else:
+    fbs_barber = pandas.read_csv("test/smooth_hmm.csv", header=None).as_matrix()  # read in the ideal answers
+    filter_barber = pandas.read_csv("test/filter_hmm.csv", header=None).as_matrix()  # read in the ideal answers
 
 # Discrete model
 A = numpy.array([[0.5, 0.0, 0.0], [0.3, 0.6, 0.0], [0.2, 0.4, 1.0]])  # transition probabilities
