@@ -54,3 +54,10 @@ def viterbi_test():
 def prediction_test():
     mod1.prediction(initial, evidence)  # No test for this - not implemented by barber
     assert True
+
+
+if __name__ == '__main__':
+    filter_test()
+    smooth_test()
+    viterbi_test()
+    prediction_test()

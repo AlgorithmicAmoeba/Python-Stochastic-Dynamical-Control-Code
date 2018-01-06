@@ -86,3 +86,7 @@ def filter_test():
 
     tol = 20.0
     assert (abs(fmeans-kfmeans)).max() < tol
+
+
+if __name__ == '__main__':
+    filter_test()

@@ -90,3 +90,7 @@ def smooth_test():
 
     assert (abs(smoothedcovar_own - smoothedcovar)).max() < tol
 
+
+if __name__ == '__main__':
+    filter_test()
+    smooth_test()

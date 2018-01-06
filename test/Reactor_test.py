@@ -31,3 +31,7 @@ def simulation_test():
 
     tol = 0.1
     assert abs(state_solutions - xs.T).max() < tol
+
+
+if __name__ == '__main__':
+    simulation_test()
