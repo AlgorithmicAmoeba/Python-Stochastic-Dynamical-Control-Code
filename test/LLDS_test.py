@@ -46,19 +46,19 @@ visiblestates_path = pathlib.Path("visiblestates.csv")
 if visiblestates_path.is_file():
     visiblestates = pandas.read_csv("visiblestates.csv", header=None).as_matrix()  # read in the ideal answers
     filtercovar_file = pandas.read_csv("filtercovar.csv", header=None).as_matrix()
-    filtercovar = numpy.reshape(filtercovar_file, [6, 6, T])  # read in the ideal answers
+    filtercovar = numpy.reshape(filtercovar_file, [6, 6, T], order='F')  # read in the ideal answers
     filtermeans = pandas.read_csv("filtermeans.csv", header=None).as_matrix()  # read in the ideal answers
     smoothedcovar_file = pandas.read_csv("smoothcovar.csv", header=None).as_matrix()
-    smoothedcovar = numpy.reshape(smoothedcovar_file, [6, 6, T])  # read in the ideal answers
-    smoothedmeans = pandas.read_csv("smoothmeans.csv", header=None)  # read in the ideal answers
+    smoothedcovar = numpy.reshape(smoothedcovar_file, [6, 6, T], order='F')  # read in the ideal answers
+    smoothedmeans = pandas.read_csv("smoothmeans.csv", header=None).as_matrix()  # read in the ideal answers
 else:
     visiblestates = pandas.read_csv("test/visiblestates.csv", header=None).as_matrix()  # read in the ideal answers
     filtercovar_file = pandas.read_csv("test/filtercovar.csv", header=None).as_matrix()
-    filtercovar = numpy.reshape(filtercovar_file, [6, 6, T])  # read in the ideal answers
+    filtercovar = numpy.reshape(filtercovar_file, [6, 6, T], order='F')  # read in the ideal answers
     filtermeans = pandas.read_csv("test/filtermeans.csv", header=None).as_matrix()  # read in the ideal answers
     smoothedcovar_file = pandas.read_csv("test/smoothcovar.csv", header=None).as_matrix()
-    smoothedcovar = numpy.reshape(smoothedcovar_file, [6, 6, T])  # read in the ideal answers
-    smoothedmeans = pandas.read_csv("test/smoothmeans.csv", header=None)  # read in the ideal answers
+    smoothedcovar = numpy.reshape(smoothedcovar_file, [6, 6, T], order='F')  # read in the ideal answers
+    smoothedmeans = pandas.read_csv("test/smoothmeans.csv", header=None).as_matrix()  # read in the ideal answers
 
 # Filter
 ucontrol = numpy.zeros(1)  # no control so this is really only a dummy variable.
@@ -90,8 +90,8 @@ def unroll(a, b, tt):
 
 # Filter Inference
 assert (abs(filtermeans_own - filtermeans)).max() < tol
-print(unroll(filtercovar_own, filtercovar, T))
-assert unroll(filtercovar_own, filtercovar, T) < tol
+
+assert (abs(filtercovar_own - filtercovar)).max() < tol
 
 assert (abs(smoothedmeans_own - smoothedmeans)).max() < tol
 
