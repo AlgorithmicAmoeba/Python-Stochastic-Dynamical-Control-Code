@@ -60,29 +60,33 @@ else:
     smoothedcovar = numpy.reshape(smoothedcovar_file, [6, 6, T], order='F')  # read in the ideal answers
     smoothedmeans = pandas.read_csv("test/smoothmeans.csv", header=None).as_matrix()  # read in the ideal answers
 
-# Filter
-ucontrol = numpy.zeros(1)  # no control so this is really only a dummy variable.
-filtermeans_own = numpy.zeros([6, T])
-filtercovar_own = numpy.zeros([6, 6, T])
-filtermeans_own[:, 0], filtercovar_own[:, :, 0] = model.init_filter(init_mean, init_covar, visiblestates[:, 0])
-for t in range(1, T):
-    temp = model.step_filter(filtermeans_own[:, t-1], filtercovar_own[:, :, t-1], ucontrol, visiblestates[:, t])
-    filtermeans_own[:, t], filtercovar_own[:, :, t] = temp
-
-# Smoothed
-ucontrols = numpy.zeros([1, T])  # no control so this is really only a dummy variable.
-
-smoothedmeans_own, smoothedcovar_own = model.smooth(filtermeans_own, filtercovar_own, ucontrols)
-
-# Run the tests
 tol = 0.01
 
-# Filter Inference
-assert (abs(filtermeans_own - filtermeans)).max() < tol
 
-assert (abs(filtercovar_own - filtercovar)).max() < tol
+def filter_test():
+    ucontrol = numpy.zeros(1)  # no control so this is really only a dummy variable.
+    filtermeans_own = numpy.zeros([6, T])
+    filtercovar_own = numpy.zeros([6, 6, T])
+    filtermeans_own[:, 0], filtercovar_own[:, :, 0] = model.init_filter(init_mean, init_covar, visiblestates[:, 0])
+    for t in range(1, T):
+        temp = model.step_filter(filtermeans_own[:, t-1], filtercovar_own[:, :, t-1], ucontrol, visiblestates[:, t])
+        filtermeans_own[:, t], filtercovar_own[:, :, t] = temp
 
-assert (abs(smoothedmeans_own - smoothedmeans)).max() < tol
+    assert (abs(filtermeans_own - filtermeans)).max() < tol
 
-assert (abs(smoothedcovar_own - smoothedcovar)).max() < tol
+    assert (abs(filtercovar_own - filtercovar)).max() < tol
+
+    return filtermeans_own, filtercovar_own
+
+
+def smooth_test():
+    ucontrols = numpy.zeros([1, T])  # no control so this is really only a dummy variable.
+
+    filtermeans_own, filtercovar_own = filter_test()
+
+    smoothedmeans_own, smoothedcovar_own = model.smooth(filtermeans_own, filtercovar_own, ucontrols)
+
+    assert (abs(smoothedmeans_own - smoothedmeans)).max() < tol
+
+    assert (abs(smoothedcovar_own - smoothedcovar)).max() < tol
 
