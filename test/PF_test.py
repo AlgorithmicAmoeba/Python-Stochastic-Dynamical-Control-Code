@@ -85,5 +85,4 @@ def filter_test():
         fmeans[:, t], fcovars[:, :, t] = PF.get_stats(particles)
 
     tol = 20.0
-    print(abs(fmeans-kfmeans).max())
     assert (abs(fmeans-kfmeans)).max() < tol
