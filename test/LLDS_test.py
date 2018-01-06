@@ -77,17 +77,6 @@ smoothedmeans_own, smoothedcovar_own = model.smooth(filtermeans_own, filtercovar
 # Run the tests
 tol = 0.01
 
-
-def unroll(a, b, tt):
-    # Finds maximum difference between two 3d matrices.
-    maxdiff = 0.0
-    for k in range(tt):
-        tempdiff = abs(a[:, :, k] - b[:, :, k]).max()
-        if maxdiff < tempdiff:
-            maxdiff = tempdiff
-    return maxdiff
-
-
 # Filter Inference
 assert (abs(filtermeans_own - filtermeans)).max() < tol
 
@@ -95,5 +84,5 @@ assert (abs(filtercovar_own - filtercovar)).max() < tol
 
 assert (abs(smoothedmeans_own - smoothedmeans)).max() < tol
 
-assert unroll(smoothedcovar_own, smoothedcovar, T) < tol
+assert (abs(smoothedcovar_own - smoothedcovar)).max() < tol
 
