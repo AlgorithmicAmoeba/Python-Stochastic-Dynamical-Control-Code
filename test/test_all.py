@@ -1,36 +1,16 @@
-import matplotlib as mpl
-import sys
-import os
-mpl.use("Agg")
+import test.HMM_test as HMM_test
+import test.LLDS_test as LLDS_test
+import test.PF_test as PF_test
+import test.Reactor_test as Reactor_test
 
+HMM_test.filter_test()
+HMM_test.smooth_test()
+HMM_test.viterbi_test()
+HMM_test.prediction_test()
 
-def block_print():
-    """Disable print"""
-    sys.stdout = open(os.devnull, 'w')
+LLDS_test.filter_test()
+LLDS_test.smooth_test()
 
+PF_test.filter_test()
 
-def enable_print():
-    """Restore print"""
-    sys.stdout = sys.__stdout__
-
-
-def test_modules():
-    modules = ["openloop_scenarios_single.KF_M1",
-               "openloop_scenarios_single.KF_M2",
-               "openloop_scenarios_single.HMM_Burglar",
-               "openloop.Reactor_Compare",
-               "openloop.Reactor_Linear_Models",
-               "openloop.Reactor_Qualitative"]
-
-    for module in modules:
-        print("Testing {0}.py".format(module))
-        try:
-            block_print()
-            exec("import {0}".format(module))
-            enable_print()
-            print("Test passed\n")
-            ans = True
-        except ImportError:
-            print("Test failed\n")
-            ans = False
-        assert ans
+Reactor_test.simulation_test()
