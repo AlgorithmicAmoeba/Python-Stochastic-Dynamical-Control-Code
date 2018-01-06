@@ -22,12 +22,12 @@ N = len(ts)
 xs = numpy.zeros([2, N])
 initial_states = [0.57, 395]
 
-xs[:, 0] = initial_states
-# Loop through the rest of time
-for t in range(1, N):
-    xs[:, t] = cstr.run_reactor(xs[:, t-1], 0.0, h)  # actual plant
 
+def simulation_test():
+    xs[:, 0] = initial_states
+    # Loop through the rest of time
+    for t in range(1, N):
+        xs[:, t] = cstr.run_reactor(xs[:, t-1], 0.0, h)  # actual plant
 
-# Run the tests
-tol = 0.1
-assert abs(state_solutions - xs.T).max() < tol
+    tol = 0.1
+    assert abs(state_solutions - xs.T).max() < tol
