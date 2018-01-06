@@ -4,8 +4,13 @@
 import src.Reactor as Reactor
 import pandas
 import numpy
+import pathlib
 
-state_solutions = pandas.read_csv("state_solutions.csv", ).as_matrix()  # read in the ideal answers
+state_solutions_path = pathlib.Path("state_solutions.csv")
+if state_solutions_path.is_file():
+    state_solutions = pandas.read_csv("state_solutions.csv", ).as_matrix()  # read in the ideal answers
+else:
+    state_solutions = pandas.read_csv("test/state_solutions.csv", ).as_matrix()  # read in the ideal answers
 
 cstr = Reactor.Reactor(V=0.1, R=8.314, CA0=1.0, TA0=310.0, dH=-4.78e4,
                        k0=72.0e9, E=8.314e4, Cp=0.239, rho=1000.0, F=100e-3)

@@ -5,12 +5,19 @@ import src.Reactor as Reactor
 import pandas
 import numpy
 import scipy.stats
+import pathlib
 
-A = pandas.read_csv("A.csv", header=None).as_matrix()
-B = pandas.read_csv("B.csv", header=None).as_matrix().T[0]
-b = pandas.read_csv("b1.csv", header=None).as_matrix().T[0]
-kfmeans = pandas.read_csv("KFmeans.csv", header=None).as_matrix()
-
+A_path = pathlib.Path("A.csv")
+if A_path.is_file():
+    A = pandas.read_csv("A.csv", header=None).as_matrix()
+    B = pandas.read_csv("B.csv", header=None).as_matrix().T[0]
+    b = pandas.read_csv("b1.csv", header=None).as_matrix().T[0]
+    kfmeans = pandas.read_csv("KFmeans.csv", header=None).as_matrix()
+else:
+    A = pandas.read_csv("test/A.csv", header=None).as_matrix()
+    B = pandas.read_csv("test/B.csv", header=None).as_matrix().T[0]
+    b = pandas.read_csv("test/b1.csv", header=None).as_matrix().T[0]
+    kfmeans = pandas.read_csv("test/KFmeans.csv", header=None).as_matrix()
 
 cstr_model = Reactor.Reactor(V=5.0, R=8.314, CA0=1.0, TA0=310.0, dH=-4.78e4,
                              k0=72.0e7, E=8.314e4, Cp=0.239, rho=1000.0, F=100e-3)

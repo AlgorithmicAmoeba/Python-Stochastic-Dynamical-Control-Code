@@ -17,7 +17,6 @@ import numpy
 import pathlib
 
 smooth_path = pathlib.Path("smooth_hmm.csv")
-filter_path = pathlib.Path("filter_hmm.csv")
 if smooth_path.is_file():
     fbs_barber = pandas.read_csv("smooth_hmm.csv", header=None).as_matrix()  # read in the ideal answers
     filter_barber = pandas.read_csv("filter_hmm.csv", header=None).as_matrix()  # read in the ideal answers
