@@ -16,6 +16,7 @@
 import src.LLDS as LLDS
 import numpy
 import pandas
+import pathlib
 
 # Specify System
 dt = 0.1
@@ -41,12 +42,23 @@ init_covar = numpy.eye(6)  # vague prior covar
 init_mean = numpy.zeros(6)  # vague prior mean
 
 # Read in correct data
-visiblestates = pandas.read_csv("visiblestates.csv", header=None)  # read in the ideal answers
-filtercovar = numpy.reshape(pandas.read_csv("filtercovar.csv", header=None), [6, 6, T])  # read in the ideal answers
-filtermeans = pandas.read_csv("filtermeans.csv", header=None)  # read in the ideal answers
-smoothedcovar = numpy.reshape(pandas.read_csv("smoothcovar.csv", header=None), [6, 6, T])  # read in the ideal answers
-smoothedmeans = pandas.read_csv("smoothmeans.csv", header=None)  # read in the ideal answers
-
+visiblestates_path = pathlib.Path("visiblestates.csv")
+if visiblestates_path.is_file():
+    visiblestates = pandas.read_csv("visiblestates.csv", header=None).as_matrix()  # read in the ideal answers
+    filtercovar_file = pandas.read_csv("filtercovar.csv", header=None).as_matrix()
+    filtercovar = numpy.reshape(filtercovar_file, [6, 6, T])  # read in the ideal answers
+    filtermeans = pandas.read_csv("filtermeans.csv", header=None)  # read in the ideal answers
+    smoothedcovar_file = pandas.read_csv("smoothcovar.csv", header=None).as_matrix()
+    smoothedcovar = numpy.reshape(smoothedcovar_file, [6, 6, T])  # read in the ideal answers
+    smoothedmeans = pandas.read_csv("smoothmeans.csv", header=None)  # read in the ideal answers
+else:
+    visiblestates = pandas.read_csv("test/visiblestates.csv", header=None).as_matrix()  # read in the ideal answers
+    filtercovar_file = pandas.read_csv("test/filtercovar.csv", header=None).as_matrix()
+    filtercovar = numpy.reshape(filtercovar_file, [6, 6, T])  # read in the ideal answers
+    filtermeans = pandas.read_csv("test/filtermeans.csv", header=None)  # read in the ideal answers
+    smoothedcovar_file = pandas.read_csv("test/smoothcovar.csv", header=None).as_matrix()
+    smoothedcovar = numpy.reshape(smoothedcovar_file, [6, 6, T])  # read in the ideal answers
+    smoothedmeans = pandas.read_csv("test/smoothmeans.csv", header=None)  # read in the ideal answers
 
 # Filter
 ucontrol = numpy.zeros(1)  # no control so this is really only a dummy variable.
