@@ -58,7 +58,6 @@ init_state_mean = init_state  # initial state mean
 init_state_covar = numpy.eye(2) * 1e-6  # initial covariance
 init_state_covar[1, 1] = 2.0
 init_dist = scipy.stats.multivariate_normal(mean=init_state_mean, cov=init_state_covar)  # prior distribution
-particles = PF.init_pf(init_dist, nP, 2)  # initialise the particles
 state_covar = numpy.eye(2)  # state covariance
 state_covar[0, 0] = 1e-4
 state_covar[0, 1] = 4.
@@ -68,21 +67,23 @@ meas_covar[0, 0] = 1e-4
 meas_covar[1, 1] = 10.
 meas_dist = scipy.stats.multivariate_normal(cov=meas_covar)  # measurement distribution
 
-fmeans = numpy.zeros([2, N])
-fcovars = numpy.zeros([2, 2, N])
-# Time step 1
-xs[:, 0] = init_state
-ys[:, 0] = C @ xs[:, 0] + meas_dist.rvs()  # measured from actual plant
-particles = PF.init_filter(particles, ys[:, 0], meas_dist, cstr_pf)
-fmeans[:, 0], fcovars[:, :, 0] = PF.get_stats(particles)
-# Loop through the rest of time
-for t in range(1, N):
-    xs[:, t] = cstr_model.run_reactor(xs[:, t-1], 0.0, h)  # actual plant
-    ys[:, t] = C @ xs[:, t] + meas_dist.rvs()  # measured from actual plant
-    particles = PF.pf_filter(particles, 0.0, ys[:, t], state_dist, meas_dist, cstr_pf)
-    fmeans[:, t], fcovars[:, :, t] = PF.get_stats(particles)
 
-# Run the tests
-tol = 20.0
-print(abs(fmeans-kfmeans).max())
-assert (abs(fmeans-kfmeans)).max() < tol
+def filter_test():
+    particles = PF.init_pf(init_dist, nP, 2)  # initialise the particles
+    fmeans = numpy.zeros([2, N])
+    fcovars = numpy.zeros([2, 2, N])
+    # Time step 1
+    xs[:, 0] = init_state
+    ys[:, 0] = C @ xs[:, 0] + meas_dist.rvs()  # measured from actual plant
+    particles = PF.init_filter(particles, ys[:, 0], meas_dist, cstr_pf)
+    fmeans[:, 0], fcovars[:, :, 0] = PF.get_stats(particles)
+    # Loop through the rest of time
+    for t in range(1, N):
+        xs[:, t] = cstr_model.run_reactor(xs[:, t-1], 0.0, h)  # actual plant
+        ys[:, t] = C @ xs[:, t] + meas_dist.rvs()  # measured from actual plant
+        particles = PF.pf_filter(particles, 0.0, ys[:, t], state_dist, meas_dist, cstr_pf)
+        fmeans[:, t], fcovars[:, :, t] = PF.get_stats(particles)
+
+    tol = 20.0
+    print(abs(fmeans-kfmeans).max())
+    assert (abs(fmeans-kfmeans)).max() < tol
