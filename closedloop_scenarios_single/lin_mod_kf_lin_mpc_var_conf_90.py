@@ -71,10 +71,10 @@ for i in range(len(params.kfmeans[0])):
     params.ys2[:, i] += b
 
 # Plot the results
-Results.plot_tracking(params.ts, params.xs, params.ys2, params.kfmeans, params.us, 2) #, ysp+b[1])
-#Results.plot_ellipses2(params.ts, params.xs, params.kfmeans, params.kfcovars, [aline, cline],
-#                       linsystems[2].op, True, 4.6052, 1, "best")
-#Results.check_constraint(params.ts, params.xs, [aline, cline])
-#Results.calc_error(params.xs, ysp+b[1])
-#Results.calc_energy(params.us, 0.0)
+Results.plot_tracking1(params.ts, params.xs, params.ys2, params.kfmeans, params.us, 2, ysp[0]+b[0])
+Results.plot_ellipses2(params.ts, params.xs, params.kfmeans, params.kfcovars, [aline, cline],
+                       linsystems[1].op, True, 4.6052, 1, "best")
+Results.check_constraint(params.ts, params.xs, [aline, cline])
+Results.calc_error1(params.xs, ysp[0]+b[0])
+Results.calc_energy(params.us, 0.0)
 plt.show()
