@@ -91,10 +91,10 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     AA = scipy.sparse.vstack([AA, temp3])
 
     temp1 = numpy.zeros([N-1, (N + 1) * nx])
-    temp2 = numpy.zeros([N-1, 1])
-    temp2[0, 0] = 1
-    temp3 = -scipy.sparse.eye(N-1)
-    temp3 += scipy.sparse.eye(N-1, k=-1)
+    temp2 = numpy.zeros([N-1, nu])
+    temp2[0][:nu] = 1
+    temp3 = scipy.sparse.kron(scipy.sparse.eye(N-1), -numpy.ones_like(u))
+    temp3 += scipy.sparse.kron(scipy.sparse.eye(N-1, k=-1), -numpy.ones_like(u))
     temp4 = scipy.sparse.hstack([temp1, temp2, temp3])
     AA = scipy.sparse.vstack([AA, temp4])
 
