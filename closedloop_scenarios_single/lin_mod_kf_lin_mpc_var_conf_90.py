@@ -47,7 +47,6 @@ horizon = 150
 aline = 10  # slope of constraint line ax + by + c = 0
 cline = -412  # negative of the y axis intercept
 bline = 1
-print(params.kfmeans[:, 0])
 params.us[0] = MPC.mpc_var(params.kfmeans[:, 0], params.kfcovars[:, :, 0], horizon,
                            A, numpy.matrix(B), b, aline, bline, cline, params.QQ, params.RR, ysp,
                            usp[0], 10000.0, 1000.0, False, 1.0, params.Q, 4.6052, True)  # get the controller input
@@ -56,8 +55,8 @@ for t in range(1, params.N):
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
     temp = kf_cstr.step_filter(params.kfmeans[:, t-1], params.kfcovars[:, :, t-1], params.us[t-1], params.ys2[:, t])
     params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
-    print(params.kfmeans[:, t])
     if t % 10 == 0:
+        #print(params.us[t - 1])
         params.us[t] = MPC.mpc_var(params.kfmeans[:, t], params.kfcovars[:, :, t], horizon,
                                    A, numpy.matrix(B), b, aline, bline, cline, params.QQ, params.RR, ysp,
                                    usp[0], 10000.0, 1000.0, False, 1.0, params.Q, 4.6052, True)  # get controller input

@@ -84,6 +84,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     temp2 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N+1, k=-1), A)])
     AA = temp1 + temp2
 
+
     temp1 = scipy.sparse.vstack([numpy.zeros([nx, N*nu]), scipy.sparse.kron(scipy.sparse.eye(N), B)])
     AA = scipy.sparse.hstack([AA, temp1])
 
@@ -104,7 +105,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     temp2 = numpy.zeros([N-1, nu])
     temp2[0][:nu] = 1
     temp3 = scipy.sparse.kron(scipy.sparse.eye(N-1), -numpy.eye(nu))
-    temp3 += scipy.sparse.kron(scipy.sparse.eye(N-1, k=-1), -numpy.eye(nu))
+    temp3 += scipy.sparse.kron(scipy.sparse.eye(N-1, k=-1), numpy.eye(nu))
     temp4 = scipy.sparse.hstack([temp1, temp2, temp3])
     AA = scipy.sparse.vstack([AA, temp4])
 
@@ -143,14 +144,13 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     """
     lower = numpy.hstack([leq, limits, [-limu]*N])
     upper = numpy.hstack([leq, [numpy.inf]*len(limits), [limu]*N])"""
-
     prob = osqp.OSQP()
 
     nullwrite = NullWriter()
     oldstdout = sys.stdout
     sys.stdout = nullwrite  # disable output
     #prob.update_settings(verbose=False)
-    prob.setup(P, q, AA, L.todense().T, U.todense().T)
+    prob.setup(P, q, AA, L.todense().T, U.todense().T, warm_start=True)
 
 
     res = prob.solve()
@@ -159,7 +159,8 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
 
     if res.info.status != 'solved':
         raise ValueError('OSQP did not solve the problem!')
-    return (res.x[(N+1)*nx: (N+1)*nx+nu])
+    print(res.x[(N+1)*nx-2: (N+1)*nx+nu+2])
+    return res.x[(N+1)*nx: (N+1)*nx+nu]
     #status = solve(m)
 
     # return getValue(u[1]) # get the controller input
