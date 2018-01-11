@@ -64,7 +64,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     nx, nu = B.shape
     numpy.set_printoptions(linewidth=120)
     QN = QQ
-    d_T = numpy.hstack([aline, bline])
+    d_T = numpy.matrix(numpy.hstack([aline, bline]))
 
     P = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N), QQ), QN,
                                  scipy.sparse.kron(scipy.sparse.eye(N), RR)])
@@ -112,21 +112,20 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     constraints = scipy.sparse.hstack([scipy.sparse.kron(scipy.sparse.eye(N), d), numpy.zeros([N, nu])])
     u_constaraints = numpy.hstack([numpy.zeros([N, nx*N]), numpy.eye(N)])
     C_T = scipy.sparse.vstack([Aeq, constraints, u_constaraints])"""
-    e = cline
+    e = -cline
     if growvar:
         sigmas = Q + A @ fcovar @ A.T
         limits = numpy.zeros(N)
         for k in range(N):  # don't do anything about k=1
-            rsquared = d.T @ sigmas @ d
-            print(rsquared)
-            r = (sigma*numpy.sqrt(rsquared)-e)*swapcon
+            rsquared = d_T @ sigmas @ d_T.T
+            r = (numpy.sqrt(sigma*rsquared)-e)*swapcon
             sigmas = Q + A @ sigmas @ A.T
             limits[k] = r
     else:
         sigmas = Q + A @ fcovar @ A.T
         limits = numpy.zeros(N)
         for k in range(N):  # don't do anything about k=1
-            rsquared = d.T @ sigmas @ d
+            rsquared = d_T @ sigmas @ d_T.T
             r = (numpy.sqrt(sigma*rsquared) - e) * swapcon
             limits[k] = r
     print("here")
