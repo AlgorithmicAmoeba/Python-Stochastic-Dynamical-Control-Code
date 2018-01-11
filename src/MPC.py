@@ -141,6 +141,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
             limits[k] = r
     L = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), limits, [-limu]*N, [-limstepu]*(N-1)])
     U = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), [numpy.inf]*N, [limu]*N, [limstepu]*(N-1)])
+    #print(U.todense()[(N + 1) * nx + N])
     """
     lower = numpy.hstack([leq, limits, [-limu]*N])
     upper = numpy.hstack([leq, [numpy.inf]*len(limits), [limu]*N])"""
@@ -159,7 +160,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
 
     if res.info.status != 'solved':
         raise ValueError('OSQP did not solve the problem!')
-    print(res.x[(N+1)*nx-2: (N+1)*nx+nu+2])
+    #print(res.x[(N+1)*nx-2: (N+1)*nx+nu+2])
     return res.x[(N+1)*nx: (N+1)*nx+nu]
     #status = solve(m)
 

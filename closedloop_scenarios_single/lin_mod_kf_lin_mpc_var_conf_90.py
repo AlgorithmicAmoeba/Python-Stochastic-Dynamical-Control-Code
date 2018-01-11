@@ -56,7 +56,6 @@ for t in range(1, params.N):
     temp = kf_cstr.step_filter(params.kfmeans[:, t-1], params.kfcovars[:, :, t-1], params.us[t-1], params.ys2[:, t])
     params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
     if t % 10 == 0:
-        #print(params.us[t - 1])
         params.us[t] = MPC.mpc_var(params.kfmeans[:, t], params.kfcovars[:, :, t], horizon,
                                    A, numpy.matrix(B), b, aline, bline, cline, params.QQ, params.RR, ysp,
                                    usp[0], 10000.0, 1000.0, False, 1.0, params.Q, 4.6052, True)  # get controller input
