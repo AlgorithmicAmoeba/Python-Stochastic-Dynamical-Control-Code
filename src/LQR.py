@@ -45,23 +45,24 @@ def inv(x):
 
 def offset(A, B, C, H, ysp):
     """Returns the state and controller offset."""
+    B = B.T
     rA, cA = get_size(A)
-    rB, cB = get_size(B)
+    rB, cB = B.shape
     rC, cC = get_size(C)
-    rH, cH = get_size(H)
-    lenysp = len(ysp)
+    rH, cH = H.shape
+    lenysp, = ysp.shape
     if cA+cB-cC == 0:
         z1 = numpy.zeros(rA+rH-rB)
     else:
-        z1 = numpy.zeros(rA+rH-rB, cA+cB-cC)
+        z1 = numpy.zeros([rA+rH-rB, cA+cB-cC])
 
     z2 = numpy.zeros(rA+rH-lenysp)
-    ssvec = [[z2], [ysp]]
-    ssmat = [[numpy.eye(rA)-A - B], [H @ C, z1]]
-    ss = numpy.linalg.inv(ssmat) @ ssvec
+    ssvec = numpy.matrix(numpy.hstack([z2, ysp]))
+    ssmat = numpy.vstack([ numpy.hstack([numpy.eye(rA)-A, -B]), numpy.hstack([H @ C, z1])])
 
+    ss = numpy.array((numpy.linalg.inv(ssmat) @ ssvec.T).T)[0]
     x_off = ss[:rA]
-    u_off = ss[rA+1:]
+    u_off = ss[rA:]
     return x_off, u_off
 
 
@@ -74,10 +75,10 @@ def get_size(A):
     else:
         x = A.shape
         if len(x) == 1:
-            r = x[1]
+            r = x[0]
             c = 0
         else:
-            r = x[1]
-            c = x[2]
+            r = x[0]
+            c = x[1]
 
     return r, c
