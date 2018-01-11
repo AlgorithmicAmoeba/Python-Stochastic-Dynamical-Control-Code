@@ -58,11 +58,12 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     """return the MPC control input using a linear system"""
 
     # m = Model(solver=IpoptSolver(print_level=0)) # chooses optimiser by itself
+
     x = numpy.zeros([2, N])
     u = numpy.zeros(N - 1)
     B = B.T
     nx, nu = B.shape
-    numpy.set_printoptions(linewidth=120)
+    numpy.set_printoptions(linewidth=150)
     QN = QQ
     d_T = numpy.matrix(numpy.hstack([aline, bline]))
 
@@ -72,6 +73,8 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     q = numpy.hstack([numpy.kron(numpy.ones(N), -QQ @ ysp), -QN @ ysp,
                       numpy.kron(numpy.ones(N), -RR @ usp)])
 
+    print("P\n", P.todense())
+    print("q\n", q)
     #Handling of mu_(k+1) = A @ mu_k + B @ u_k
     temp1 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N+1), -numpy.ones_like(A))])
     temp2 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N+1, k=-1), A)])
@@ -79,17 +82,20 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
 
     temp1 = scipy.sparse.vstack([numpy.zeros([nx, N*nu]), scipy.sparse.kron(scipy.sparse.eye(N), B)])
     AA = scipy.sparse.hstack([AA, temp1])
+    print("ONE\n", AA.todense())
 
     # Handling of d.T mu_k > k sqrt(d.T @ Sigma_k @ d) - e
     temp1 = scipy.sparse.hstack([numpy.zeros([N, nx]), scipy.sparse.kron(scipy.sparse.eye(N), d_T)])
     temp2 = numpy.zeros([N, N*nu])
     temp3 = scipy.sparse.hstack([temp1, temp2])
+    print("TWO\n", temp3.todense())
     AA = scipy.sparse.vstack([AA, temp3])
 
     # Handling of -limu <= u <= limu
     temp1 = numpy.zeros([N, (N+1)*nx])
     temp2 = scipy.sparse.kron(scipy.sparse.eye(N), numpy.ones_like(u))
     temp3 = scipy.sparse.hstack([temp1, temp2])
+    print("THREE\n", temp3.todense())
     AA = scipy.sparse.vstack([AA, temp3])
 
     # Handling of -limstep <= u <= limstepu
@@ -99,6 +105,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     temp3 = scipy.sparse.kron(scipy.sparse.eye(N-1), -numpy.ones_like(u))
     temp3 += scipy.sparse.kron(scipy.sparse.eye(N-1, k=-1), -numpy.ones_like(u))
     temp4 = scipy.sparse.hstack([temp1, temp2, temp3])
+    print("FOUR\n", temp4.todense())
     AA = scipy.sparse.vstack([AA, temp4])
 
     """# - linear dynamics
@@ -134,6 +141,8 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     print("here")
     L = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), limits, [-limu]*N, [-limstepu]*(N-1)])
     U = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), [numpy.inf]*N, [limu]*N, [limstepu]*(N-1)])
+    print("L\n", L.todense())
+    print("U\n", U.todense())
     """
     lower = numpy.hstack([leq, limits, [-limu]*N])
     upper = numpy.hstack([leq, [numpy.inf]*len(limits), [limu]*N])"""
