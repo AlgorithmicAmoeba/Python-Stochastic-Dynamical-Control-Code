@@ -55,9 +55,9 @@ class Params:
         self.C1 = [0.0, 1.0]  # we measure only temperature
 
         # Controller settings (using quadratic cost function)
-        self.QQ = numpy.zeros(2, 2)
+        self.QQ = numpy.zeros([2, 2])
         self.QQ[0, 0] = 10000.0  # due to the magnitude of the concentration
-        self.RR = 0.000001
+        self.RR = numpy.array([0.000001])
 
 # a = round(Int64, time() * 1000) #If this fails, 1515377081187 is a great value to use
 # println(a)
