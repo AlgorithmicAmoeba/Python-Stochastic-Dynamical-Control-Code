@@ -15,44 +15,45 @@ def plot_tracking1(ts, xs, ys, fmeans, us, obs, setpoint):
         subplt = 2
     else:
         subplt = 3
-        
-    mpl.rc("font", family="serif", serif="Computer Modern", len=12)
+
+    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
     mpl.rc("text", usetex=True)
 
-    skipmeas = int(len(ts)/80)
-    skipmean = int(len(ts)/40)
+    skipmeas = int(len(ts) / 80)
+    skipmean = int(len(ts) / 40)
     plt.figure()
     plt.subplot(subplt, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
     if obs == 2:  # plt.plot second measurement
         plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
-        
+
     plt.plot(ts[::skipmean], fmeans[0][::skipmean], "bx", markersize=5, markeredgewidth=2)
     ksp = plt.plot(ts, setpoints, "g-", linewidth=3)
     plt.ylabel(r"C$_A$ [kmol.m$^{-3}$]")
     plt.locator_params(nbins=4)
-    plt.legend([x1, ksp], ["Underlying model", "Set point"], loc="best", ncol=2)
+    plt.legend([x1], ["Underlying model"], loc="best")
     plt.xlim([0, tend])
+    # ylim([0, 1])
 
     plt.subplot(subplt, 1, 2)
-    plt.plot(ts, xs[2, :], "k", linewidth=3)
+    plt.plot(ts, xs[1, :], "k", linewidth=3)
     if obs == 1:
-        y2, = plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
+        y2, = plt.plot(ts[::skipmeas], ys[::skipmeas], "kx", markersize=5, markeredgewidth=1)
     else:
         y2, = plt.plot(ts[::skipmeas], ys[1][::skipmeas], "kx", markersize=5, markeredgewidth=1)
-        
+
     k2, = plt.plot(ts[::skipmean], fmeans[1][::skipmean], "bx", markersize=5, markeredgewidth=2)
     plt.ylabel(r"T$_R$ [K]")
     plt.locator_params(nbins=4)
-    plt.legend([k2, y2], ["Filtered mean", "Observations"], loc="best", ncol=2)
+    plt.legend([k2, y2], ["Filtered mean", "Observations"], loc="best")
     plt.xlim([0, tend])
     # ylim([minimum(xs[2, :]), maximum(xs[2, :])])
     if subplt == 3:
         plt.subplot(subplt, 1, 3)
-        plt.plot(ts, (1/60.0)*us)
+        plt.plot(ts, (1 / 60.0) * us)
         plt.xlim([0, tend])
         plt.ylabel("Q [kW]")
-        
+
     plt.locator_params(nbins=4)
     plt.xlabel("Time [min]")
 
@@ -210,9 +211,9 @@ def plot_ellipses2(ts, xs, fmeans, fcovars,  line, sp, nf, sigma, pick, legloc):
     # line = [b, c] => y + bx + c = 0
     # line => y = - bx - c
 
-    lxs = [x/100 for x in range(-10, 110, 5)]
+    lxs = numpy.array([x/100 for x in range(-10, 110, 5)])
     lys = -line[0]*lxs - line[1]
-    plt.xlim([0.0, 1])
+    plt.xlim([min(xs[0, :]-1e-1), max(xs[0, :]+1e-1)])
     plt.ylim([min(xs[1, :]-10), max(xs[1, :]+10)])
     plt.plot(lxs, lys, "r-")
 
@@ -390,7 +391,7 @@ def calc_energy(us, uss):
 def check_constraint(ts, xs, line):
     """line = [b, c] => y + bx + c = 0
     line => y = - bx - c"""
-    r, N = len(xs)
+    r, N = xs.shape
     conmargin = numpy.zeros([N])
     minneg = float("inf")
     minpos = float("inf")
