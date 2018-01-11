@@ -72,7 +72,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     q = numpy.hstack([numpy.kron(numpy.ones(N), -QQ @ ysp), -QN @ ysp,
                       numpy.kron(numpy.ones(N), -RR @ usp)])
 
-
+    #Handling of mu_(k+1) = A @ mu_k + B @ u_k
     temp1 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N+1), -numpy.ones_like(A))])
     temp2 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N+1, k=-1), A)])
     AA = temp1 + temp2
@@ -80,16 +80,19 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     temp1 = scipy.sparse.vstack([numpy.zeros([nx, N*nu]), scipy.sparse.kron(scipy.sparse.eye(N), B)])
     AA = scipy.sparse.hstack([AA, temp1])
 
+    # Handling of d.T mu_k > k sqrt(d.T @ Sigma_k @ d) - e
     temp1 = scipy.sparse.hstack([numpy.zeros([N, nx]), scipy.sparse.kron(scipy.sparse.eye(N), d_T)])
     temp2 = numpy.zeros([N, N*nu])
     temp3 = scipy.sparse.hstack([temp1, temp2])
     AA = scipy.sparse.vstack([AA, temp3])
 
+    # Handling of -limu <= u <= limu
     temp1 = numpy.zeros([N, (N+1)*nx])
     temp2 = scipy.sparse.kron(scipy.sparse.eye(N), numpy.ones_like(u))
     temp3 = scipy.sparse.hstack([temp1, temp2])
     AA = scipy.sparse.vstack([AA, temp3])
 
+    # Handling of -limstep <= u <= limstepu
     temp1 = numpy.zeros([N-1, (N + 1) * nx])
     temp2 = numpy.zeros([N-1, nu])
     temp2[0][:nu] = 1
