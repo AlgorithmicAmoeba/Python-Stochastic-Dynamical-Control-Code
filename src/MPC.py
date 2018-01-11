@@ -93,12 +93,6 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     temp2 = numpy.zeros([N, N*nu])
     temp3 = scipy.sparse.hstack([temp1, temp2])
     AA = scipy.sparse.vstack([AA, temp3])
-    """
-    # Handling of -limu <= u <= limu
-    temp1 = numpy.zeros([N, (N+1)*nx])
-    temp2 = scipy.sparse.kron(scipy.sparse.eye(N), numpy.eye(nu))
-    temp3 = scipy.sparse.hstack([temp1, temp2])
-    AA = scipy.sparse.vstack([AA, temp3])
 
     # Handling of -limstep <= u <= limstepu
     temp1 = numpy.zeros([N-1, (N + 1) * nx])
@@ -107,7 +101,13 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     temp3 = scipy.sparse.kron(scipy.sparse.eye(N-1), -numpy.eye(nu))
     temp3 += scipy.sparse.kron(scipy.sparse.eye(N-1, k=-1), numpy.eye(nu))
     temp4 = scipy.sparse.hstack([temp1, temp2, temp3])
-    AA = scipy.sparse.vstack([AA, temp4])"""
+    AA = scipy.sparse.vstack([AA, temp4])
+    """
+    # Handling of -limu <= u <= limu
+    temp1 = numpy.zeros([N, (N+1)*nx])
+    temp2 = scipy.sparse.kron(scipy.sparse.eye(N), numpy.eye(nu))
+    temp3 = scipy.sparse.hstack([temp1, temp2])
+    AA = scipy.sparse.vstack([AA, temp3])"""
 
     """# - linear dynamics
     Ax = scipy.sparse.kron(scipy.sparse.eye(N + 1), -scipy.sparse.eye(nx))
@@ -139,8 +139,8 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
             rsquared = d_T @ sigmas @ d_T.T
             r = (numpy.sqrt(sigma*rsquared) - e) * swapcon
             limits[k] = r
-    L = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), limits])  #, [-limu]*N, [-limstepu]*(N-1)])
-    U = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), [numpy.inf]*N])  #, [limu]*N, [limstepu]*(N-1)])
+    L = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), limits, [-limstepu]*(N-1)])  #, [-limu]*N])
+    U = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), [numpy.inf]*N, [limstepu]*(N-1)])  #, [limu]*N])
 
 
     """
