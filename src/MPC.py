@@ -114,15 +114,16 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     C_T = scipy.sparse.vstack([Aeq, constraints, u_constaraints])"""
     e = cline
     if growvar:
-        sigmas = Q + A*fcovar*A.T
+        sigmas = Q + A @ fcovar @ A.T
         limits = numpy.zeros(N)
         for k in range(N):  # don't do anything about k=1
             rsquared = d.T @ sigmas @ d
+            print(rsquared)
             r = (sigma*numpy.sqrt(rsquared)-e)*swapcon
             sigmas = Q + A @ sigmas @ A.T
             limits[k] = r
     else:
-        sigmas = Q + A * fcovar * A.T
+        sigmas = Q + A @ fcovar @ A.T
         limits = numpy.zeros(N)
         for k in range(N):  # don't do anything about k=1
             rsquared = d.T @ sigmas @ d
@@ -141,7 +142,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     print(U.T.shape)
 
     prob = osqp.OSQP()
-    prob.setup(P, q, AA, L.todense().T, U.todense().T, warm_start=True)
+    prob.setup(P, q, AA, L.todense().T, U.todense().T)
     res = prob.solve()
     print(res.x)
     #status = solve(m)
