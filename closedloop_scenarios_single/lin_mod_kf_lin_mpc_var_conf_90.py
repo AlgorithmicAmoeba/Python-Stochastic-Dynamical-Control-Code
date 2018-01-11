@@ -10,6 +10,7 @@ import src.Results as Results
 import numpy
 import matplotlib.pyplot as plt
 
+
 tend = 80
 params = closedloop_scenarios_single.closedloop_params.Params(tend)  # end time of simulation
 
@@ -58,7 +59,7 @@ for t in range(1, params.N):
     if t % 10 == 0:
         params.us[t] = MPC.mpc_var(params.kfmeans[:, t], params.kfcovars[:, :, t], horizon,
                                    A, numpy.matrix(B), b, aline, bline, cline, params.QQ, params.RR, ysp,
-                                   usp[0], 10000.0, 1000.0, False, 1.0, params.Q, 4.6052, True)  # get controller input
+                                   usp[0], 10000, 1000, False, 1.0, params.Q, 4.6052, True)  # get controller input
     else:
         params.us[t] = params.us[t-1]
 
