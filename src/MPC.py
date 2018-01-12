@@ -4,6 +4,7 @@ import numpy
 import scipy.sparse
 import sys
 
+
 class NullWriter(object):
     def write(self, arg):
         pass
@@ -59,14 +60,10 @@ def mpc_mean(adjmean, horizon, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, l
 """
 
 
-def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
-            ysp, usp, limu, limstepu, revconstr, swapcon, Q, sigma, growvar, d=numpy.zeros(2)):
+def mpc_var(x0, cov0, N, A, B, aline, bline, e, QQ, RR,
+            ysp, usp, lim_u, lim_step_u, Q, k, growvar=True):
     """return the MPC control input using a linear system"""
 
-    # m = Model(solver=IpoptSolver(print_level=0)) # chooses optimiser by itself
-
-    x = numpy.zeros([2, N])
-    u = numpy.zeros(N - 1)
     B = B.T
     nx, nu = B.shape
     numpy.set_printoptions(linewidth=150)
@@ -79,11 +76,10 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     q = numpy.hstack([numpy.kron(numpy.ones(N), -QQ @ ysp), -QN @ ysp,
                       numpy.kron(numpy.ones(N), -RR @ usp)])
 
-    #Handling of mu_(k+1) = A @ mu_k + B @ u_k
+    # Handling of mu_(k+1) = A @ mu_k + B @ u_k
     temp1 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N+1), -numpy.eye(nx))])
     temp2 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N+1, k=-1), A)])
     AA = temp1 + temp2
-
 
     temp1 = scipy.sparse.vstack([numpy.zeros([nx, N*nu]), scipy.sparse.kron(scipy.sparse.eye(N), B)])
     AA = scipy.sparse.hstack([AA, temp1])
@@ -109,51 +105,27 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
     temp3 = scipy.sparse.hstack([temp1, temp2])
     AA = scipy.sparse.vstack([AA, temp3])
 
-    """# - linear dynamics
-    Ax = scipy.sparse.kron(scipy.sparse.eye(N + 1), -scipy.sparse.eye(nx))
-    Ax += scipy.sparse.kron(scipy.sparse.eye(N + 1, k=-1), A)
-    Bu = scipy.sparse.kron(scipy.sparse.vstack([scipy.sparse.csc_matrix((1, N)), scipy.sparse.eye(N)]), B)
-    Aeq = scipy.sparse.hstack([Ax, Bu])
-    leq = numpy.hstack([-adjmean, numpy.zeros(N * nx)])
+    e = -e
 
-    # # add distribution constraints (Ipopt doens't like it when its a quadratic constraint because nonconvex)
-    # sigma = 2.2788 # one sigma 68 % confidence
-    # sigma = 4.605 # 90 % confidence
-    # sigma = 9.21 # 99 % confidence
-    constraints = scipy.sparse.hstack([scipy.sparse.kron(scipy.sparse.eye(N), d), numpy.zeros([N, nu])])
-    u_constaraints = numpy.hstack([numpy.zeros([N, nx*N]), numpy.eye(N)])
-    C_T = scipy.sparse.vstack([Aeq, constraints, u_constaraints])"""
-    e = -cline
-    if growvar:
-        sigmas = Q + A @ fcovar @ A.T
-        limits = numpy.zeros(N)
-        for k in range(N):  # don't do anything about k=1
-            rsquared = d_T @ sigmas @ d_T.T
-            r = (numpy.sqrt(sigma*rsquared)-e)*swapcon
+    sigmas = Q + A @ cov0 @ A.T
+    limits = numpy.zeros(N)
+    for i in range(N):  # don't do anything about i=1
+        rsquared = d_T @ sigmas @ d_T.T
+        r = numpy.sqrt(k * rsquared) - e
+        if growvar:
             sigmas = Q + A @ sigmas @ A.T
-            limits[k] = r
-    else:
-        sigmas = Q + A @ fcovar @ A.T
-        limits = numpy.zeros(N)
-        for k in range(N):  # don't do anything about k=1
-            rsquared = d_T @ sigmas @ d_T.T
-            r = (numpy.sqrt(sigma*rsquared) - e) * swapcon
-            limits[k] = r
-    L = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), limits, [-limstepu]*(N-1), [-limu]*N])
-    U = scipy.sparse.hstack([-adjmean, numpy.zeros(N*nx), [numpy.inf]*N, [limstepu]*(N-1), [limu]*N])
+        limits[i] = r
 
+    L = scipy.sparse.hstack([-x0, numpy.zeros(N * nx), limits, [-lim_step_u] * (N - 1), [-lim_u] * N])
+    U = scipy.sparse.hstack([-x0, numpy.zeros(N * nx), [numpy.inf] * N, [lim_step_u] * (N - 1), [lim_u] * N])
 
-    """
-    lower = numpy.hstack([leq, limits, [-limu]*N])
-    upper = numpy.hstack([leq, [numpy.inf]*len(limits), [limu]*N])"""
     prob = osqp.OSQP()
 
     nullwrite = NullWriter()
     oldstdout = sys.stdout
     sys.stdout = nullwrite  # disable output
-    #prob.update_settings(verbose=False)
+    # prob.update_settings(verbose=False)  Does not work. Causes segfault
     prob.setup(P, q, AA, L.todense().T, U.todense().T, warm_start=True)
-
 
     res = prob.solve()
 
@@ -161,11 +133,7 @@ def mpc_var(adjmean, fcovar, N, A, B, b, aline, bline, cline, QQ, RR,
 
     if res.info.status != 'solved':
         raise ValueError('OSQP did not solve the problem!')
-    #print(res.x[(N+1)*nx-2: (N+1)*nx+nu+2])
     return res.x[(N+1)*nx: (N+1)*nx+nu]
-    #status = solve(m)
-
-    # return getValue(u[1]) # get the controller input
 
 
 """

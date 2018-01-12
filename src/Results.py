@@ -28,7 +28,7 @@ def plot_tracking1(ts, xs, ys, fmeans, us, obs, setpoint):
         plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
 
     plt.plot(ts[::skipmean], fmeans[0][::skipmean], "bx", markersize=5, markeredgewidth=2)
-    ksp = plt.plot(ts, setpoints, "g-", linewidth=3)
+    plt.plot(ts, setpoints, "g-", linewidth=3)
     plt.ylabel(r"C$_A$ [kmol.m$^{-3}$]")
     plt.locator_params(nbins=4)
     plt.legend([x1], ["Underlying model"], loc="best")

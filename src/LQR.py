@@ -58,7 +58,7 @@ def offset(A, B, C, H, ysp):
 
     z2 = numpy.zeros(rA+rH-lenysp)
     ssvec = numpy.matrix(numpy.hstack([z2, ysp]))
-    ssmat = numpy.vstack([ numpy.hstack([numpy.eye(rA)-A, -B]), numpy.hstack([H @ C, z1])])
+    ssmat = numpy.vstack([numpy.hstack([numpy.eye(rA)-A, -B]), numpy.hstack([H @ C, z1])])
 
     ss = numpy.array((numpy.linalg.inv(ssmat) @ ssvec.T).T)[0]
     x_off = ss[:rA]

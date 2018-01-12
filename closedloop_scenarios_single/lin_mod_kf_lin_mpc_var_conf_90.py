@@ -51,8 +51,8 @@ bline = 1
 
 limu = numpy.inf
 params.us[0] = MPC.mpc_var(params.kfmeans[:, 0], params.kfcovars[:, :, 0], horizon,
-                           A, numpy.matrix(B), b, aline, bline, cline, params.QQ, params.RR, ysp,
-                           usp[0], limu, 1000.0, False, 1.0, params.Q, 4.6052, True)  # get the controller input
+                           A, numpy.matrix(B), aline, bline, cline, params.QQ, params.RR, ysp,
+                           usp[0], limu, 1000.0, params.Q, 4.6052, True)  # get the controller input
 for t in range(1, params.N):
     params.xs[:, t] = A @ params.xs[:, t-1] + B*params.us[t-1] + state_noise_dist.rvs()  # actual plant
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
@@ -60,8 +60,8 @@ for t in range(1, params.N):
     params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
     if t % 10 == 0:
         params.us[t] = MPC.mpc_var(params.kfmeans[:, t], params.kfcovars[:, :, t], horizon,
-                                   A, numpy.matrix(B), b, aline, bline, cline, params.QQ, params.RR, ysp,
-                                   usp[0], limu, 1000, False, 1.0, params.Q, 4.6052, True)  # get controller input
+                                   A, numpy.matrix(B), aline, bline, cline, params.QQ, params.RR, ysp,
+                                   usp[0], limu, 1000, params.Q, 4.6052, True)  # get controller input
     else:
         params.us[t] = params.us[t-1]
 
