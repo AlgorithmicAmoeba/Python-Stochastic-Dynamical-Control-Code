@@ -49,13 +49,13 @@ for t in range(1, params.N):
     params.xs[:, t] = A @ (params.xs[:, t-1]-b) + B*params.us[t-1] + b + state_noise_dist.rvs()  # actual plant
 
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
-    temp = kf_cstr.step_filter(params.kfmeans[:, t-1], params.kfcovars[:,:, t-1], params.us[t-1], params.ys2[:, t]-b)
+    temp = kf_cstr.step_filter(params.kfmeans[:, t-1], params.kfcovars[:, :, t-1], params.us[t-1], params.ys2[:, t]-b)
     params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
 
     # Compute controller action
-    if t%10 == 0:
+    if t % 10 == 0:
         params.us[t] = MPC.mpc_lqr(params.kfmeans[:, t], horizon, A,
-                                   numpy.matrix(B),params.QQ, params.RR,
+                                   numpy.matrix(B), params.QQ, params.RR,
                                    numpy.array([0, 0]), numpy.array([0.0]))  # get the controller input
     else:
         params.us[t] = params.us[t-1]
