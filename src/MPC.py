@@ -150,6 +150,8 @@ def mpc_var(x0, cov0, N, A, B, aline, bline, e, QQ, RR,
 
     if res.info.status != 'solved':
         raise ValueError('OSQP did not solve the problem!')
+
+    check_constraints(AA, res.x, x0, N, nx, limits, lim_step_u)
     return res.x[(N+1)*nx: (N+1)*nx+nu]
 
 
@@ -192,3 +194,28 @@ def mpc_lqr(x0, N, A, B, QQ, RR, ysp, usp):
     if res.info.status != 'solved':
         raise ValueError('OSQP did not solve the problem!')
     return res.x[(N + 1) * nx: (N + 1) * nx + nu]
+
+
+def check_constraints(AA, x, x0, N, nx, limits, lim_step_u):
+    limu = 20000
+    L = scipy.sparse.hstack([-x0, numpy.zeros(N * nx), limits, [-lim_step_u] * (N - 1), [-limu] * N])
+    U = scipy.sparse.hstack([-x0, numpy.zeros(N * nx), [numpy.inf] * N, [lim_step_u] * (N - 1), [limu] * N])
+
+    L = L.todense()
+    U = U.todense()
+    Y = AA @ x
+
+    print("Checking constraints")
+
+    for i in range(len(Y)):
+        if Y[i] < L[0, i] - 1:
+            print("L")
+            print(i)
+            print(Y[i])
+            print(L[0, i])
+
+        if Y[i] > U[0, i] + 1:
+            print("U")
+            print(i)
+            print(Y[i])
+            print(U[0, i])
