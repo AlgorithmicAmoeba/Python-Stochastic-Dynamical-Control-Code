@@ -66,7 +66,6 @@ def mpc_var(x0, cov0, N, A, B, aline, bline, e, QQ, RR,
 
     B = B.T
     nx, nu = B.shape
-    numpy.set_printoptions(linewidth=150)
     QN = QQ
     d_T = numpy.matrix(numpy.hstack([aline, bline]))
 
@@ -136,37 +135,42 @@ def mpc_var(x0, cov0, N, A, B, aline, bline, e, QQ, RR,
     return res.x[(N+1)*nx: (N+1)*nx+nu]
 
 
-"""
-function mpc_lqr(adjmean, horizon, A, B, b, QQ, RR, ysp, usp, d=zeros(2))
-  # return the MPC control input using a linear system
+def mpc_lqr(x0, N, A, B, QQ, RR, ysp, usp):
+    """return the MPC control input using a linear system"""
 
-  # m = Model(solver=IpoptSolver(print_level=0)) # chooses optimiser by itself
-  m = Model(solver=MosekSolver(LOG=0)) # chooses optimiser by itself
+    B = B.T
+    nx, nu = B.shape
+    QN = QQ
 
-  @defVar(m, x[1:2, 1:horizon])
-  @defVar(m, u[1:horizon-1])
+    P = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N), QQ), QN,
+                                 scipy.sparse.kron(scipy.sparse.eye(N), RR)])
 
-  @addConstraint(m, x[1, 1] == adjmean[1])
-  @addConstraint(m, x[2, 1] == adjmean[2])
-  @addConstraint(m, x[1, 2] == A[1,1]*adjmean[1] + A[1,2]*adjmean[2] + B[1]*u[1] + d[1])
-  @addConstraint(m, x[2, 2] == A[2,1]*adjmean[1] + A[2,2]*adjmean[2] + B[2]*u[1] + d[2])
+    q = numpy.hstack([numpy.kron(numpy.ones(N), -QQ @ ysp), -QN @ ysp,
+                      numpy.kron(numpy.ones(N), -RR @ usp)])
 
-  for k=3:horizon
-    @addConstraint(m, x[1, k] == A[1,1]*x[1, k-1] + A[1,2]*x[2, k-1] + B[1]*u[k-1] + d[1])
-    @addConstraint(m, x[2, k] == A[2,1]*x[1, k-1] + A[2,2]*x[2, k-1] + B[2]*u[k-1] + d[2])
-  end
+    # Handling of mu_(k+1) = A @ mu_k + B @ u_k
+    temp1 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N + 1), -numpy.eye(nx))])
+    temp2 = scipy.sparse.block_diag([scipy.sparse.kron(scipy.sparse.eye(N + 1, k=-1), A)])
+    AA = temp1 + temp2
 
+    temp1 = scipy.sparse.vstack([numpy.zeros([nx, N * nu]), scipy.sparse.kron(scipy.sparse.eye(N), B)])
+    AA = scipy.sparse.hstack([AA, temp1])
 
-  @setObjective(m, Min, sum{QQ[1]*x[1, i]^2 - 2.0*ysp*QQ[1]*x[1, i] + RR*u[i]^2 - 2.0*usp*RR*u[i], i=1:horizon-1} + QQ[1]*x[1, horizon]^2 - 2.0*QQ[1]*ysp*x[1, horizon])
+    L = scipy.sparse.hstack([-x0, numpy.zeros(N * nx)])
+    U = scipy.sparse.hstack([-x0, numpy.zeros(N * nx)])
 
-  status = solve(m)
+    prob = osqp.OSQP()
 
-  if status != :Optimal
-    warn("Mosek did not converge. Attempting to use Ipopt...")
-    unow = mpc_lqr_i(adjmean, horizon, A, B, b, QQ, RR, ysp, usp, d)
-    return unow
-  end
+    nullwrite = NullWriter()
+    oldstdout = sys.stdout
+    sys.stdout = nullwrite  # disable output
+    # prob.update_settings(verbose=False)  Does not work. Causes segfault
+    prob.setup(P, q, AA, L.todense().T, U.todense().T, warm_start=True)
 
-  return getValue(u[1]) # get the controller input
-end
-"""
+    res = prob.solve()
+
+    sys.stdout = oldstdout  # enable output
+
+    if res.info.status != 'solved':
+        raise ValueError('OSQP did not solve the problem!')
+    return res.x[(N + 1) * nx: (N + 1) * nx + nu]
