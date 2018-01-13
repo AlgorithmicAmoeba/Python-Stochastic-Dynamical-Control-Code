@@ -357,9 +357,6 @@ def calc_error(x, y):
 def calc_error1(x, y):
 
     r, N = numpy.shape(x)
-    print(numpy.shape(x[0]))
-    print(numpy.shape(y))
-    print(numpy.shape(x[0]-y))
     avediff1 = (1/N)*sum(abs(numpy.divide((x[0] - y), y)))*100
     print("Average Concentration Error: ", round(avediff1, 4),  "%")
     return avediff1
