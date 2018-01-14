@@ -57,6 +57,8 @@ for t in range(1, params.N):
         params.us[t] = MPC.mpc_lqr(params.kfmeans[:, t], horizon, A,
                                    numpy.matrix(B), params.QQ, params.RR,
                                    numpy.array([0, 0]), numpy.array([0.0]))  # get the controller input
+        if params.us[t] is None or numpy.isnan(params.us[t]):
+            break
     else:
         params.us[t] = params.us[t-1]
 
