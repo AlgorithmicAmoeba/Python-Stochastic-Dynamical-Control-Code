@@ -46,13 +46,17 @@ params.kfmeans[:, 0], params.kfcovars[:, :, 0] = temp
 horizon = 150
 # add state constraints
 aline = 10  # slope of constraint line ax + by + c = 0
-cline = -412  # negative of the y axis intercept
+cline = -398  # negative of the y axis intercept
 bline = 1
+e = cline
 
-limu = numpy.inf
+k_squared = 4.6052
+growvar = True
+
+limu = 10000
 params.us[0] = MPC.mpc_var(params.kfmeans[:, 0], params.kfcovars[:, :, 0], horizon,
-                           A, numpy.matrix(B), aline, bline, cline, params.QQ, params.RR, ysp,
-                           usp[0], limu, 1000.0, params.Q, 4.6052, True)  # get the controller input
+                           A, numpy.matrix(B), b, aline, bline, e, params.QQ, params.RR, ysp,
+                           usp[0], limu, 1000.0, params.Q, k_squared, growvar)  # get the controller input
 for t in range(1, params.N):
     params.xs[:, t] = A @ params.xs[:, t-1] + B*params.us[t-1] + state_noise_dist.rvs()  # actual plant
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
@@ -60,8 +64,11 @@ for t in range(1, params.N):
     params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
     if t % 10 == 0:
         params.us[t] = MPC.mpc_var(params.kfmeans[:, t], params.kfcovars[:, :, t], horizon,
-                                   A, numpy.matrix(B), aline, bline, cline, params.QQ, params.RR, ysp,
-                                   usp[0], limu, 1000, params.Q, 4.6052, True)  # get controller input
+                                   A, numpy.matrix(B), b, aline, bline, e, params.QQ, params.RR, ysp,
+                                   usp[0], limu, 1000, params.Q, k_squared, growvar)  # get controller input
+
+        if params.us[t] is None or numpy.isnan(params.us[t]):
+            break
     else:
         params.us[t] = params.us[t-1]
 
@@ -73,7 +80,7 @@ for i in range(len(params.kfmeans[0])):
 # Plot the results
 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.kfmeans, params.us, 2, ysp[0]+b[0])
 Results.plot_ellipses2(params.ts, params.xs, params.kfmeans, params.kfcovars, [aline, cline],
-                       linsystems[1].op, True, 4.6052, 1, "best")
+                       linsystems[1].op, True, k_squared, 0, "best")
 Results.check_constraint(params.ts, params.xs, [aline, cline])
 Results.calc_error1(params.xs, ysp[0]+b[0])
 Results.calc_energy(params.us, 0.0)
