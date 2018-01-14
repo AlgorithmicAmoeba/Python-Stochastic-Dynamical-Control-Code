@@ -1,19 +1,11 @@
 
-import osqp
 import numpy
 import scipy.sparse
 import sys
+import cvxpy
 
 
-class NullWriter(object):
-    def write(self, arg):
-        pass
-
-
-print("MPC is hardcoded for the CSTR!")
-
-
-def mpc_mean(x0, N, A, B, aline, bline, e, QQ, RR, ysp, usp, lim_u, lim_step_u):
+def mpc_mean(x0, N, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, lim_u, lim_step_u):
     """return the MPC control input using a linear system"""
     B = B.T
     nx, nu = B.shape
@@ -38,7 +30,7 @@ def mpc_mean(x0, N, A, B, aline, bline, e, QQ, RR, ysp, usp, lim_u, lim_step_u):
     temp1 = scipy.sparse.hstack([numpy.zeros([N, nx]), scipy.sparse.kron(scipy.sparse.eye(N), d_T)])
     temp2 = numpy.zeros([N, N * nu])
     temp3 = scipy.sparse.hstack([temp1, temp2])
-    AA = scipy.sparse.vstack([AA, temp3])
+    GG = temp3
 
     # Handling of -limstep <= u <= limstepu
     temp1 = numpy.zeros([N - 1, (N + 1) * nx])
@@ -47,38 +39,40 @@ def mpc_mean(x0, N, A, B, aline, bline, e, QQ, RR, ysp, usp, lim_u, lim_step_u):
     temp3 = scipy.sparse.kron(scipy.sparse.eye(N - 1), -numpy.eye(nu))
     temp3 += scipy.sparse.kron(scipy.sparse.eye(N - 1, k=-1), numpy.eye(nu))
     temp4 = scipy.sparse.hstack([temp1, temp2, temp3])
-    AA = scipy.sparse.vstack([AA, temp4])
+    GG = scipy.sparse.vstack([GG, temp4])
 
     # Handling of -limu <= u <= limu
     temp1 = numpy.zeros([N, (N + 1) * nx])
     temp2 = scipy.sparse.kron(scipy.sparse.eye(N), numpy.eye(nu))
     temp3 = scipy.sparse.hstack([temp1, temp2])
-    AA = scipy.sparse.vstack([AA, temp3])
+    GG = scipy.sparse.vstack([GG, temp3])
 
-    e = -e
+    e = int(cline + d_T @ b)
     limits = [-e] * N
 
-    L = scipy.sparse.hstack([-x0, numpy.zeros(N * nx), limits, [-lim_step_u] * (N - 1), [-lim_u] * N])
-    U = scipy.sparse.hstack([-x0, numpy.zeros(N * nx), [numpy.inf] * N, [lim_step_u] * (N - 1), [lim_u] * N])
+    bb = numpy.hstack([-x0, numpy.zeros(N * nx)])
+    L = numpy.hstack([limits, [-lim_step_u] * (N - 1), [-lim_u] * N])
+    U = numpy.hstack([[numpy.inf] * N, [lim_step_u] * (N - 1), [lim_u] * N])
 
-    prob = osqp.OSQP()
+    n = q.shape[0]
+    x = cvxpy.Variable(n)
+    P = cvxpy.Constant(P)
+    objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, P) + q * x)
+    constraints = [GG * x <= U, GG * x >= L, AA * x == bb]
 
-    nullwrite = NullWriter()
-    oldstdout = sys.stdout
-    sys.stdout = nullwrite  # disable output
-    # prob.update_settings(verbose=False)  Does not work. Causes segfault
-    prob.setup(P, q, AA, L.todense().T, U.todense().T, warm_start=True)
+    prob = cvxpy.Problem(objective, constraints)
+    prob.solve(solver='MOSEK')
+    if prob.status != "optimal":
+        print(prob.status)
+        print(prob.is_qp())
+        return None
+    res = numpy.array(x.value).reshape((n,))
 
-    res = prob.solve()
-
-    sys.stdout = oldstdout  # enable output
-
-    if res.info.status != 'solved':
-        raise ValueError('OSQP did not solve the problem!')
-    return res.x[(N + 1) * nx: (N + 1) * nx + nu]
+    check_constraints(GG, L, U, res, b)
+    return res[(N + 1) * nx: (N + 1) * nx + nu]
 
 
-def mpc_var(x0, cov0, N, A, B, aline, bline, e, QQ, RR,
+def mpc_var(x0, cov0, N, A, B, b, aline, bline, cline, QQ, RR,
             ysp, usp, lim_u, lim_step_u, Q, k, growvar=True):
     """return the MPC control input using a linear system"""
 
@@ -105,7 +99,7 @@ def mpc_var(x0, cov0, N, A, B, aline, bline, e, QQ, RR,
     temp1 = scipy.sparse.hstack([numpy.zeros([N, nx]), scipy.sparse.kron(scipy.sparse.eye(N), d_T)])
     temp2 = numpy.zeros([N, N*nu])
     temp3 = scipy.sparse.hstack([temp1, temp2])
-    AA = scipy.sparse.vstack([AA, temp3])
+    GG = temp3
 
     # Handling of -limstep <= u <= limstepu
     temp1 = numpy.zeros([N-1, (N + 1) * nx])
@@ -114,44 +108,45 @@ def mpc_var(x0, cov0, N, A, B, aline, bline, e, QQ, RR,
     temp3 = scipy.sparse.kron(scipy.sparse.eye(N-1), -numpy.eye(nu))
     temp3 += scipy.sparse.kron(scipy.sparse.eye(N-1, k=-1), numpy.eye(nu))
     temp4 = scipy.sparse.hstack([temp1, temp2, temp3])
-    AA = scipy.sparse.vstack([AA, temp4])
+    GG = scipy.sparse.vstack([GG, temp4])
 
     # Handling of -limu <= u <= limu
     temp1 = numpy.zeros([N, (N+1)*nx])
     temp2 = scipy.sparse.kron(scipy.sparse.eye(N), numpy.eye(nu))
     temp3 = scipy.sparse.hstack([temp1, temp2])
-    AA = scipy.sparse.vstack([AA, temp3])
+    GG = scipy.sparse.vstack([GG, temp3])
 
-    e = -e
+    e = cline + d_T @ b
 
     sigmas = Q + A @ cov0 @ A.T
     limits = numpy.zeros(N)
-    for i in range(N):  # don't do anything about i=1
+    for i in range(N):
         rsquared = d_T @ sigmas @ d_T.T
-        r = numpy.sqrt(k * rsquared) - e
+        r = - e + numpy.sqrt(k * rsquared)
         if growvar:
             sigmas = Q + A @ sigmas @ A.T
         limits[i] = r
 
-    L = scipy.sparse.hstack([-x0, numpy.zeros(N * nx), limits, [-lim_step_u] * (N - 1), [-lim_u] * N])
-    U = scipy.sparse.hstack([-x0, numpy.zeros(N * nx), [numpy.inf] * N, [lim_step_u] * (N - 1), [lim_u] * N])
+    bb = numpy.hstack([-x0, numpy.zeros(N * nx)])
+    L = numpy.hstack([limits, [-lim_step_u] * (N - 1), [-lim_u] * N])
+    U = numpy.hstack([[numpy.inf] * N, [lim_step_u] * (N - 1), [lim_u] * N])
 
-    prob = osqp.OSQP()
+    n = q.shape[0]
+    x = cvxpy.Variable(n)
+    P = cvxpy.Constant(P)
+    objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, P) + q * x)
+    constraints = [GG * x <= U, GG * x >= L, AA * x == bb]
 
-    nullwrite = NullWriter()
-    oldstdout = sys.stdout
-    sys.stdout = nullwrite  # disable output
-    # prob.update_settings(verbose=False)  Does not work. Causes segfault
-    prob.setup(P, q, AA, L.todense().T, U.todense().T, warm_start=True)
+    prob = cvxpy.Problem(objective, constraints)
+    prob.solve(solver='MOSEK')
+    if prob.status != "optimal":
+        print(prob.status)
+        print(prob.is_qp())
+        return None
+    res = numpy.array(x.value).reshape((n,))
 
-    res = prob.solve()
-
-    sys.stdout = oldstdout  # enable output
-
-    if res.info.status != 'solved':
-        raise ValueError('OSQP did not solve the problem!')
-
-    return res.x[(N+1)*nx: (N+1)*nx+nu]
+    check_constraints(GG, L, U, res, b)
+    return res[(N+1)*nx: (N+1)*nx+nu]
 
 
 def mpc_lqr(x0, N, A, B, QQ, RR, ysp, usp):
@@ -175,21 +170,30 @@ def mpc_lqr(x0, N, A, B, QQ, RR, ysp, usp):
     temp1 = scipy.sparse.vstack([numpy.zeros([nx, N * nu]), scipy.sparse.kron(scipy.sparse.eye(N), B)])
     AA = scipy.sparse.hstack([AA, temp1])
 
-    L = scipy.sparse.hstack([-x0, numpy.zeros(N * nx)])
-    U = scipy.sparse.hstack([-x0, numpy.zeros(N * nx)])
+    bb = numpy.hstack([-x0, numpy.zeros(N * nx)])
 
-    prob = osqp.OSQP()
+    n = q.shape[0]
+    x = cvxpy.Variable(n)
+    P = cvxpy.Constant(P)
+    objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, P) + q * x)
+    constraints = [AA * x == bb]
 
-    nullwrite = NullWriter()
-    oldstdout = sys.stdout
-    sys.stdout = nullwrite  # disable output
-    # prob.update_settings(verbose=False)  Does not work. Causes segfault
-    prob.setup(P, q, AA, L.todense().T, U.todense().T, warm_start=True)
+    prob = cvxpy.Problem(objective, constraints)
+    prob.solve(solver='LS')
+    if not prob.status.startswith("optimal"):
+        print(prob.status)
+        print(prob.is_qp())
+        return None
+    res = numpy.array(x.value).reshape((n,))
 
-    res = prob.solve()
+    return res[(N + 1) * nx: (N + 1) * nx + nu]
 
-    sys.stdout = oldstdout  # enable output
 
-    if res.info.status != 'solved':
-        raise ValueError('OSQP did not solve the problem!')
-    return res.x[(N + 1) * nx: (N + 1) * nx + nu]
+def check_constraints(GG, L, U, x, b):
+    Y = GG @ x
+    for i in range(len(Y)):
+        if Y[i] > U[i]:
+            print("Upper bound broken at index {0}: {1:10.2f} should be less than {2:10.2f}".format(i, Y[i], U[i]))
+
+        if Y[i] < L[i]:
+            print("Lower bound broken at index {0}: {1:10.2f} should be larger than {2:10.2f}".format(i, Y[i], L[i]))
