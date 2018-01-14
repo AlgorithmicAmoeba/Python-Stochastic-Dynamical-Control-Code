@@ -47,12 +47,12 @@ params.kfmeans[:, 0], params.kfcovars[:, :, 0] = temp
 horizon = 150
 # add state constraints
 aline = 10  # slope of constraint line ax + by + c = 0
-cline = -412  # negative of the y axis intercept
+cline = -398  # negative of the y axis intercept
 bline = 1
 
-lim_u = numpy.inf
+lim_u = 10000
 
-params.us[0] = MPC.mpc_mean(params.kfmeans[:, 0], horizon, A, numpy.matrix(B),
+params.us[0] = MPC.mpc_mean(params.kfmeans[:, 0], horizon, A, numpy.matrix(B), b,
                             aline, bline, cline, params.QQ, params.RR, ysp,
                             usp[0], lim_u, 1000.0)  # get the controller input
 for t in range(1, params.N):
@@ -61,9 +61,11 @@ for t in range(1, params.N):
     temp = kf_cstr.step_filter(params.kfmeans[:, t-1], params.kfcovars[:, :, t-1], params.us[t-1], params.ys2[:, t])
     params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
     if t % 10 == 0:
-        params.us[t] = MPC.mpc_mean(params.kfmeans[:, t], horizon, A, numpy.matrix(B),
+        params.us[t] = MPC.mpc_mean(params.kfmeans[:, t], horizon, A, numpy.matrix(B), b,
                                     aline, bline, cline, params.QQ,
                                     params.RR, ysp, usp[0], lim_u, 1000.0)
+        if params.us[t] is None or numpy.isnan(params.us[t]):
+            break
     else:
         params.us[t] = params.us[t-1]
 
