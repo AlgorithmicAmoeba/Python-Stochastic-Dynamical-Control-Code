@@ -11,7 +11,7 @@ import numpy
 import matplotlib.pyplot as plt
 
 
-def main(nine):
+def main(nine, mcN=1):
     if nine == 90:
         k_squared = 4.6052
         plot_setting = 0
@@ -50,11 +50,6 @@ def main(nine):
     state_noise_dist = scipy.stats.multivariate_normal(cov=params.Q)
     meas_noise_dist = scipy.stats.multivariate_normal(cov=params.R2)
 
-    # First time step of the simulation
-    params.xs[:, 0] = init_state - b  # set simulation starting point to the random initial state
-    params.ys2[:, 0] = params.C2 @ params.xs[:, 0] + meas_noise_dist.rvs()  # measure from actual plant
-    temp = kf_cstr.init_filter(init_state-b, params.init_state_covar, params.ys2[:, 0])  # filter
-    params.kfmeans[:, 0], params.kfcovars[:, :, 0] = temp
     # Setup MPC
     horizon = 150
     # add state constraints
@@ -66,34 +61,55 @@ def main(nine):
     growvar = True
 
     limu = 10000
-    params.us[0] = MPC.mpc_var(params.kfmeans[:, 0], params.kfcovars[:, :, 0], horizon,
-                               A, numpy.matrix(B), b, aline, bline, e, params.QQ, params.RR, ysp,
-                               usp[0], limu, 1000.0, params.Q, k_squared, growvar)  # get the controller input
-    for t in range(1, params.N):
-        params.xs[:, t] = A @ params.xs[:, t-1] + B*params.us[t-1] + state_noise_dist.rvs()  # actual plant
-        params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
-        temp = kf_cstr.step_filter(params.kfmeans[:, t-1], params.kfcovars[:, :, t-1], params.us[t-1], params.ys2[:, t])
-        params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
-        if t % 10 == 0:
-            params.us[t] = MPC.mpc_var(params.kfmeans[:, t], params.kfcovars[:, :, t], horizon,
-                                       A, numpy.matrix(B), b, aline, bline, e, params.QQ, params.RR, ysp,
-                                       usp[0], limu, 1000, params.Q, k_squared, growvar)  # get controller input
 
-            if params.us[t] is None or numpy.isnan(params.us[t]):
-                break
-        else:
-            params.us[t] = params.us[t-1]
+    mcdists = numpy.zeros([2, mcN])
+    xconcen = numpy.zeros([params.N, mcN])
+    mcerrs = numpy.zeros(mcN)
 
-    for i in range(len(params.kfmeans[0])):
-        params.kfmeans[:, i] += b
-        params.xs[:, i] += b
-        params.ys2[:, i] += b
+    for mciter in range(mcN):
+        # First time step of the simulation
+        params.xs[:, 0] = init_state - b  # set simulation starting point to the random initial state
+        params.ys2[:, 0] = params.C2 @ params.xs[:, 0] + meas_noise_dist.rvs()  # measure from actual plant
+        temp = kf_cstr.init_filter(init_state - b, params.init_state_covar, params.ys2[:, 0])  # filter
+        params.kfmeans[:, 0], params.kfcovars[:, :, 0] = temp
 
-    # Plot the results
-    Results.plot_tracking1(params.ts, params.xs, params.ys2, params.kfmeans, params.us, 2, ysp[0]+b[0])
-    Results.plot_ellipses2(params.ts, params.xs, params.kfmeans, params.kfcovars, [aline, cline],
-                           linsystems[opoint].op, True, k_squared, plot_setting, "best")
-    Results.check_constraint(params.ts, params.xs, [aline, cline])
-    Results.calc_error1(params.xs, ysp[0]+b[0])
-    Results.calc_energy(params.us, 0.0)
-    plt.show()
+        params.us[0] = MPC.mpc_var(params.kfmeans[:, 0], params.kfcovars[:, :, 0], horizon,
+                                   A, numpy.matrix(B), b, aline, bline, e, params.QQ, params.RR, ysp,
+                                   usp[0], limu, 1000.0, params.Q, k_squared, growvar)  # get the controller input
+        for t in range(1, params.N):
+            params.xs[:, t] = A @ params.xs[:, t-1] + B*params.us[t-1] + state_noise_dist.rvs()  # actual plant
+            params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
+            params.kfmeans[:, t], params.kfcovars[:, :, t] = kf_cstr.step_filter(params.kfmeans[:, t-1],
+                                                                                 params.kfcovars[:, :, t-1],
+                                                                                 params.us[t-1], params.ys2[:, t])
+            if t % 10 == 0:
+                params.us[t] = MPC.mpc_var(params.kfmeans[:, t], params.kfcovars[:, :, t], horizon,
+                                           A, numpy.matrix(B), b, aline, bline, e, params.QQ, params.RR, ysp,
+                                           usp[0], limu, 1000, params.Q, k_squared, growvar)  # get controller input
+
+                if params.us[t] is None or numpy.isnan(params.us[t]):
+                    break
+            else:
+                params.us[t] = params.us[t-1]
+
+        for i in range(len(params.kfmeans[0])):
+            params.kfmeans[:, i] += b
+            params.xs[:, i] += b
+            params.ys2[:, i] += b
+
+        xconcen[:, mciter] = params.xs[0, :]
+        mcerrs[mciter] = Results.calc_error1(params.xs, ysp[0] + b[0])
+        Results.get_mc_res(params.xs, params.kfcovars, [aline, cline], mcdists, mciter, params.h)
+        if mcN == 1:
+            # Plot the results
+            Results.plot_tracking1(params.ts, params.xs, params.ys2, params.kfmeans, params.us, 2, ysp[0]+b[0])
+            Results.plot_ellipses2(params.ts, params.xs, params.kfmeans, params.kfcovars, [aline, cline],
+                                   linsystems[opoint].op, True, k_squared, plot_setting, "best")
+            Results.check_constraint(params.ts, params.xs, [aline, cline])
+            Results.calc_error1(params.xs, ysp[0]+b[0])
+            Results.calc_energy(params.us, 0.0)
+            plt.show()
+
+    if mcN != 1:
+        print("The absolute MC average error is: ", sum(abs(mcerrs)) / mcN)
+        numpy.savetxt("linmod_kf_var{}_mc.csv".format(nine), xconcen, delimiter=",")
