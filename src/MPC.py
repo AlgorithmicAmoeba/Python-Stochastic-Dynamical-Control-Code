@@ -179,7 +179,7 @@ def mpc_lqr(x0, N, A, B, QQ, RR, ysp, usp):
     constraints = [AA * x == bb]
 
     prob = cvxpy.Problem(objective, constraints)
-    prob.solve(solver='LS')
+    prob.solve(solver='MOSEK')
     if not prob.status.startswith("optimal"):
         print(prob.status)
         print(prob.is_qp())
