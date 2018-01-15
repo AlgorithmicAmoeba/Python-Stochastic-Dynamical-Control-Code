@@ -1,7 +1,6 @@
 
 import numpy
 import scipy.sparse
-import sys
 import cvxpy
 
 
@@ -68,7 +67,7 @@ def mpc_mean(x0, N, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, lim_u, lim_s
         return None
     res = numpy.array(x.value).reshape((n,))
 
-    check_constraints(GG, L, U, res, b)
+    # check_constraints(GG, L, U, res, b)
     return res[(N + 1) * nx: (N + 1) * nx + nu]
 
 
@@ -145,7 +144,7 @@ def mpc_var(x0, cov0, N, A, B, b, aline, bline, cline, QQ, RR,
         return None
     res = numpy.array(x.value).reshape((n,))
 
-    check_constraints(GG, L, U, res, b)
+    # check_constraints(GG, L, U, res, b)
     return res[(N+1)*nx: (N+1)*nx+nu]
 
 
