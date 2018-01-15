@@ -57,7 +57,7 @@ class Params:
         # Controller settings (using quadratic cost function)
         self.QQ = numpy.zeros([2, 2])
         self.QQ[0, 0] = 10000.0  # due to the magnitude of the concentration
-        self.RR = numpy.array([1e-5]) # 1e-6
+        self.RR = numpy.array([1e-5])  # 1e-6
 
 # a = round(Int64, time() * 1000) #If this fails, 1515377081187 is a great value to use
 # println(a)

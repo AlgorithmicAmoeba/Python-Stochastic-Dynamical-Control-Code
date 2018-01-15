@@ -188,7 +188,7 @@ def mpc_lqr(x0, N, A, B, QQ, RR, ysp, usp):
     return res[(N + 1) * nx: (N + 1) * nx + nu]
 
 
-def check_constraints(GG, L, U, x, b):
+def check_constraints(GG, L, U, x):
     Y = GG @ x
     for i in range(len(Y)):
         if Y[i] > U[i]:
