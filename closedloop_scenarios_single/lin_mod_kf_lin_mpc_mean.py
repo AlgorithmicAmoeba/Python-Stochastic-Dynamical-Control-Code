@@ -47,7 +47,7 @@ params.kfmeans[:, 0], params.kfcovars[:, :, 0] = temp
 horizon = 150
 # add state constraints
 aline = 10  # slope of constraint line ax + by + c = 0
-cline = -398  # negative of the y axis intercept
+cline = -411  # negative of the y axis intercept
 bline = 1
 
 lim_u = 10000
