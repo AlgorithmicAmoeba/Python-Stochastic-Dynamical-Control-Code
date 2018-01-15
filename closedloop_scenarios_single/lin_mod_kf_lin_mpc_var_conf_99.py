@@ -3,4 +3,4 @@
 
 import closedloop_scenarios_single.lin_mod_kf_lin_mpc_var_conf
 
-closedloop_scenarios_single.lin_mod_kf_lin_mpc_var_conf.main(90)
+closedloop_scenarios_single.lin_mod_kf_lin_mpc_var_conf.main(99)
