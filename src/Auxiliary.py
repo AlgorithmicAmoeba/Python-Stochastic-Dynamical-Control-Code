@@ -117,11 +117,11 @@ def remove_outliers(xs, multiple=2):
             remindex.append(k)
 
     fxs = numpy.zeros([rows, cols-len(remindex)])
-    counter = 1
+    counter = 0
     for k in range(cols):
         if not (k in remindex):
             fxs[:, counter] = xs[:, k]
-        counter += 1
+            counter += 1
 
     return fxs
 
