@@ -427,7 +427,7 @@ def get_mc_res(xs, sigmas, line, mcdistmat, counter, h):
     for k in range(N):
         temp = xs[1, k] + xs[0, k]*line[0] + line[1]  # check constraint
         if temp < 0:
-            negdist += -abs(temp)/numpy.sqrt(d*sigmas[:, :, k]*d)[1]
+            negdist += -abs(temp)/numpy.sqrt(d @ sigmas[:, :, k] @ d)
             timeviolated += 1
 
     mcdistmat[0, counter] = negdist*h  # area integral
