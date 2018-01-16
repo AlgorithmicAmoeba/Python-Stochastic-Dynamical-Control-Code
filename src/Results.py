@@ -420,7 +420,7 @@ def check_constraint(ts, xs, line):
 def get_mc_res(xs, sigmas, line, mcdistmat, counter, h):
     """line = [b, c] => y + bx + c = 0
     line => y = - bx - c"""
-    d = [line[0], 0]
+    d = numpy.array([line[0], 0])
     r, N = xs.shape
     negdist = 0
     timeviolated = 0
