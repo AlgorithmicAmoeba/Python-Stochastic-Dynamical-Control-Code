@@ -24,14 +24,14 @@ def kl(part_states, part_weights, m, S, temp_states):
 
     for k in range(N):
         j = numpy.random.choice(range(len(part_weights)), size=1, p=part_weights)
-        temp_states[:, k] = part_states[:, j]
+        temp_states[:, k] = part_states[:, j].T[0]
 
     estden = scipy.stats.gaussian_kde(temp_states)
 
     kldiv = 0.0
     for k in range(N):
         # draw from samplesw
-        kldiv += -dnorm.logpdf(temp_states[:, k]) + estden.logpdf([temp_states[1, k], temp_states[2, k]])
+        kldiv += -dnorm.logpdf(temp_states[:, k]) + estden.logpdf([temp_states[0, k], temp_states[1, k]])
 
     return (1.0/N)*kldiv
 
@@ -48,7 +48,7 @@ def klbase(m, S, temp_states, N):
     kldiv = 0.0
     for k in range(N):
         # draw from samplesw
-        kldiv += -dnorm.logpdf(temp_states[:, k]) + estden.logpdf([temp_states[1, k], temp_states[2, k]])
+        kldiv += -dnorm.logpdf(temp_states[:, k]) + estden.logpdf([temp_states[0, k], temp_states[1, k]])
 
     return (1.0/N)*kldiv
 
@@ -75,7 +75,7 @@ def kluniform(m, S, temp_states, N):
     kldiv = 0.0
     for k in range(N):
         # draw from samplesw
-        kldiv += -dnorm.logpdf(temp_states[:, k]) + estden.logpdf([temp_states[1, k], temp_states[2, k]])
+        kldiv += -dnorm.logpdf(temp_states[:, k]) + estden.logpdf([temp_states[0, k], temp_states[1, k]])
 
     return (1.0/N)*kldiv
 
