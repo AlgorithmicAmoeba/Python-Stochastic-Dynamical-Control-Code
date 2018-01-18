@@ -60,7 +60,7 @@ init_state_covar[1, 1] = 2.0
 init_dist = scipy.stats.multivariate_normal(mean=init_state_mean, cov=init_state_covar)  # prior distribution
 state_covar = numpy.eye(2)  # state covariance
 state_covar[0, 0] = 1e-4
-state_covar[0, 1] = 4.
+state_covar[1, 1] = 4.
 state_dist = scipy.stats.multivariate_normal(cov=state_covar)  # state distribution
 meas_covar = numpy.eye(2)
 meas_covar[0, 0] = 1e-4
