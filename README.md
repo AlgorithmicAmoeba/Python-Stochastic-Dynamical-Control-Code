@@ -11,8 +11,11 @@ Install [Anaconda with python 3.6](https://conda.io/docs/user-guide/install/inde
 Create a dedicated conda environment:
 
     conda create -n stochastic-models python=3.6 matplotlib=2.1.0 numpy=1.13.3 scipy=0.19.1 pandas=0.22.0 pathlib=1.0.1
+    source activate stochastic-models
+    conda install -c cvxgrp cvxpy=0.4.9 libgcc=7.2.0
+    conda install -c mosek mosek=8.1.34
 
-Install pyCharm community version from [their website](https://www.jetbrains.com/pycharm/download/#section=linux) 
+Install pyCharm community version from [their website](https://www.jetbrains.com/pycharm/download/#section=linux)
 OR use the snap tool: 
 
     sudo snap install pycharm-community --classic
