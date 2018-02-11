@@ -42,7 +42,7 @@ def init_rbpf(sdist, mu_init, sigma_init, xN, nP):
 
     particles = Particles(numpy.zeros([xN, nP]), numpy.zeros([xN, xN, nP]), numpy.zeros(nP), numpy.zeros(nP))
     for p in range(nP):
-        sdraw = sdist.rvs()
+        sdraw = numpy.random.choice(range(len(sdist)), p=sdist)
         particles.mus[:, p] = mu_init  # normal mu
         particles.sigmas[:, :, p] = sigma_init
         particles.ss[p] = sdraw
