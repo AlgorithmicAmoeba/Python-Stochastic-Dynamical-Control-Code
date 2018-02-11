@@ -4,6 +4,7 @@ import numpy
 import scipy.stats
 import copy
 import src.SPF as SPF
+import collections
 
 print("RBPF is hardcoded for the CSTR!")
 
@@ -40,7 +41,8 @@ def setup_rbpf(linsystems, C, Q, R):
 def init_rbpf(sdist, mu_init, sigma_init, xN, nP):
     """Initialise the particle filter."""
 
-    particles = Particles(numpy.zeros([xN, nP]), numpy.zeros([xN, xN, nP]), numpy.zeros(nP), numpy.zeros(nP))
+    particles = Particles(numpy.zeros([xN, nP]), numpy.zeros([xN, xN, nP]),
+                          numpy.zeros(nP, dtype=numpy.int64), numpy.zeros(nP))
     for p in range(nP):
         sdraw = numpy.random.choice(range(len(sdist)), p=sdist)
         particles.mus[:, p] = mu_init  # normal mu
@@ -65,14 +67,13 @@ def init_filter(particles, u, y, models):
                 sigma = models[s].C @ temp @ models[s].C.T + models[s].R
 
                 d = scipy.stats.multivariate_normal(mean=mu, cov=sigma)
-                if len(y) == 1:
-                    particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[2]])  # HARDCODED for this system!!!
+                if not isinstance(y, collections.Sequence):
+                    particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[1]])  # HARDCODED for this system!!!
                 else:
                     particles.ws[p] = particles.ws[p]*d.pdf(y-models[s].b)  # weight of each particle
             # println("Switch: ", s, " Predicts: ", round(mu + models[s].b, 4), "Observed: ", round(y,4),
             # " Weight: ", round(particles.ws[p], 5))
             particles.mus[:, p] = particles.mus[:, p] + models[particles.ss[p]].b  # fix mu for specific switch
-
     particles.ws /= sum(particles.ws)
 
     if number_effective_particles(particles) < N/2:
@@ -99,11 +100,11 @@ def rbpf_filter(particles, u, y, models, A):
         for s in range(nS):
             if particles.ss[p] == s:
                 mu = models[s].C @ (models[s].A @ (particles.mus[:, p] - models[s].b) + models[s].B*u)
-                temp = (models[s].A @ particles.sigmas[:, :, p] @models[s].A.T + models[s].Q)
+                temp = (models[s].A @ particles.sigmas[:, :, p] @ models[s].A.T + models[s].Q)
                 sigma = models[s].C @ temp @ models[s].C.T + models[s].R
                 d = scipy.stats.multivariate_normal(mean=mu, cov=sigma)
-                if len(y) == 1:
-                    particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[2]])  # HARDCODED for this system!!!
+                if not isinstance(y, collections.Sequence):
+                    particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[1]])  # HARDCODED for this system!!!
                 else:
                     particles.ws[p] = particles.ws[p]*d.pdf(y-models[s].b)  # weight of each particle
 
@@ -118,7 +119,7 @@ def rbpf_filter(particles, u, y, models, A):
                 pvar = models[s].Q + models[s].A @ particles.sigmas[:, :, p] @ models[s].A.T
                 kalmanGain = pvar @ models[s].C.T @ numpy.linalg.inv(models[s].C @ pvar @ models[s].C.T + models[s].R)
                 ypred = models[s].C @ pmean  # predicted measurement
-                if len(y) == 1:
+                if not isinstance(y, collections.Sequence):
                     updatedMean = pmean + kalmanGain @ (y - models[s].b[1] - ypred)  # adjust for state space
                 else:
                     updatedMean = pmean + kalmanGain @ (y - models[s].b - ypred)  # adjust for state space
@@ -204,7 +205,7 @@ def get_ave_stats(particles):
     avesigma = numpy.zeros([nX, nX])
     for p in range(nP):
         ave = ave + particles.ws[p]*particles.mus[:, p]
-        avesigma = avesigma + particles.ws[p]  @ particles.sigmas[:, :, p]
+        avesigma = avesigma + particles.ws[p] * particles.sigmas[:, :, p]
 
     return ave, avesigma
 
@@ -230,16 +231,16 @@ def get_max_track(particles, numSwitches):
     for p in range(numParticles):
         totals[particles.ss[p]] += particles.ws[p]
 
-    maxtrack[numpy.argmax(totals)[0]] = 1.0
+    maxtrack[numpy.argmax(totals)] = 1.0
     return maxtrack
 
 
 def smoothed_track(numSwitches, switchtrack, ind, N):
     """returns a smoothed version of maxtrack given the history of the switch movements"""
     sN = get_history(ind, N)  # number of time intervals backwards we look
-    modswitchtrack = sum(switchtrack[:, ind-sN:ind], 2)
+    modswitchtrack = numpy.sum(switchtrack[:, ind-sN:ind], axis=1)
     modmaxtrack = numpy.zeros(numSwitches)
-    modmaxtrack[numpy.argmax(modswitchtrack)[0]] = 1.0
+    modmaxtrack[numpy.argmax(modswitchtrack)] = 1.0
     return modmaxtrack
 
 
@@ -271,6 +272,6 @@ def get_initial_switches(initial_states, linsystems):
     for i in range(N):
         posA[i] = numpy.where(a == initstates[i])[0][0]
 
-    posA /= sum(posA, 1)
+    posA /= sum(posA)
 
     return posA

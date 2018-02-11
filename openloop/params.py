@@ -54,7 +54,7 @@ class Params:
 
         # Measurement settings
         self.C2 = numpy.eye(2)  # we measure both concentration and temperature
-        self.C1 = [[0.0, 1.0]]  # we measure only temperature
+        self.C1 = numpy.array([[0.0, 1.0]])  # we measure only temperature
 
         # Controller settings (using quadratic cost function)
         self.QQ = numpy.zeros([2, 2])
