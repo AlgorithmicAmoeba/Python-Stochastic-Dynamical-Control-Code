@@ -114,14 +114,14 @@ def plot_state_space_switch(linsystems, xs):
     plt.figure()  # Model and state space
     for k in range(len(linsystems)):
         plt.plot(linsystems[k].op[0], linsystems[k].op[1], "kx", markersize=5, markeredgewidth=1)
-        plt.annotate(r"M_k",
+        plt.annotate(r"$M_" + str(k+1) + r"$",
                      xy=[linsystems[k].op[0], linsystems[k].op[1]],
                      xytext=[linsystems[k].op[0], linsystems[k].op[1]],
                      fontsize=12.0,
                      ha="center",
                      va="bottom")
         
-    plt.plot(xs[0], xs[1], "k", linewidth=3)
+    plt.plot(xs[0], xs[1], str(k+1), linewidth=3)
     plt.plot(xs[0][0], xs[1][0], "ko", markersize=10, markeredgewidth=4)
     plt.plot(xs[0][-1], xs[1][-1], "kx", markersize=10, markeredgewidth=4)
     plt.xlim([-0.1, 1.1])
@@ -136,20 +136,20 @@ def plot_switch_selection(numSwitches, strack, ts, cbaron):
     mpl.rc("text", usetex=True)
     axes = [None]*numSwitches
     im = 0
-    width = 500
+    width = 1
     for k in range(numSwitches):
-        ax = plt.subplot(numSwitches, 1, k)
+        ax = plt.subplot(numSwitches, 1, k+1)
         axes[k] = ax
         if cbaron:
-            im = plt.imshow(strack[k, :] * width, cmap="cubehelix_r",
-                            vmin=0.0, vmax=1, interpolation="nearest", aspect="auto")
+            im = plt.imshow([strack[k, :] * width], cmap="cubehelix_r",
+                            vmin=0, vmax=1, interpolation="nearest", aspect="auto")
         else:
-            im = plt.imshow(strack[k, :] * width, cmap="binary",
+            im = plt.imshow([strack[k, :] * width], cmap="binary",
                             vmin=0.0, vmax=1, interpolation="nearest", aspect="auto")
         
         plt.tick_params(axis="y", which="both", left="off", right="off", labelleft="off")
         plt.tick_params(axis="x", which="both", bottom="off", labelbottom="off")
-        plt.ylabel(r"M_k")
+        plt.ylabel(r"$M_" + str(k+1) + r"$")
 
     plt.tick_params(axis="x", labelbottom="on")
     tempts = range(0, len(ts), int(len(ts)/10.0))

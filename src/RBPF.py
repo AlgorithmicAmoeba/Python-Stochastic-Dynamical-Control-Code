@@ -49,7 +49,6 @@ def init_rbpf(sdist, mu_init, sigma_init, xN, nP):
         particles.sigmas[:, :, p] = sigma_init
         particles.ss[p] = sdraw
         particles.ws[p] = 1/nP  # uniform initial weight
-
     return particles
 
 
@@ -57,7 +56,6 @@ def init_filter(particles, u, y, models):
 
     nX, N = particles.mus.shape
     nS = len(models)
-
     for p in range(N):
         for s in range(nS):
             if particles.ss[p] == s:
@@ -67,15 +65,15 @@ def init_filter(particles, u, y, models):
                 sigma = models[s].C @ temp @ models[s].C.T + models[s].R
 
                 d = scipy.stats.multivariate_normal(mean=mu, cov=sigma)
+
                 if not isinstance(y, collections.Sequence):
                     particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[1]])  # HARDCODED for this system!!!
                 else:
                     particles.ws[p] = particles.ws[p]*d.pdf(y-models[s].b)  # weight of each particle
             # println("Switch: ", s, " Predicts: ", round(mu + models[s].b, 4), "Observed: ", round(y,4),
             # " Weight: ", round(particles.ws[p], 5))
-            particles.mus[:, p] = particles.mus[:, p] + models[particles.ss[p]].b  # fix mu for specific switch
+                particles.mus[:, p] = particles.mus[:, p] + models[particles.ss[p]].b  # fix mu for specific switch
     particles.ws /= sum(particles.ws)
-
     if number_effective_particles(particles) < N/2:
         particles = resample(particles)
 
@@ -94,8 +92,7 @@ def rbpf_filter(particles, u, y, models, A):
             if particles.ss[p] == s:
                 particles.ss[p] = numpy.random.choice(range(len(A[:, s])), size=1, p=A[:, s])
 
-
-# apply KF and weight
+    # apply KF and weight
     for p in range(N):
         for s in range(nS):
             if particles.ss[p] == s:
@@ -177,7 +174,7 @@ def number_effective_particles(particles):
 
 def roughen(particles):
     """Roughening the samples to promote diversity"""
-    xN, N = particles.x.shape
+    xN, N = particles.mus.shape
     sig = numpy.zeros(xN)
 
     K = 0.2  # parameter...
@@ -264,14 +261,14 @@ def get_initial_switches(initial_states, linsystems):
     N = len(linsystems)
     initstates = numpy.zeros(N)  # pre-allocate
 
+
     for i in range(N):
         initstates[i] = numpy.linalg.norm(linsystems[i].op-initial_states)
 
     a = numpy.sort(initstates)[:: -1]
     posA = numpy.zeros(N)
     for i in range(N):
-        posA[i] = numpy.where(a == initstates[i])[0][0]
+        posA[i] = numpy.where(a == initstates[i])[0][0] + 1
 
     posA /= sum(posA)
-
     return posA

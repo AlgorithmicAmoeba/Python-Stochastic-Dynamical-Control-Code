@@ -5,6 +5,7 @@ import scipy.stats
 import openloop.params as params
 import src.Results as Results
 import src.RBPF as RBPF
+import matplotlib.pyplot as plt
 
 tend = 150
 params = params.Params(tend)
@@ -34,7 +35,7 @@ meas_noise_dist = scipy.stats.multivariate_normal(cov=params.R1)
 params.xs[:, 0] = init_state
 params.ys1[0] = params.C1 @ params.xs[:, 0] + meas_noise_dist.rvs()  # measured from actual plant
 
-RBPF.init_filter(particles, 0.0, params.ys1[0], models)
+particles = RBPF.init_filter(particles, 0.0, params.ys1[0], models)
 params.rbpfmeans[:, 0], params.rbpfcovars[:, :, 0] = RBPF.get_ave_stats(particles)
 # rbpfmeans[:,1], rbpfcovars[:,:, 1] = RBPF.getMLStats(particles)
 
@@ -56,7 +57,7 @@ for t in range(1, params.N):
     params.xs[:, t] += state_noise_dist.rvs()
     params.ys1[t] = params.C1 @ params.xs[:, t] + meas_noise_dist.rvs()  # measured from actual plant
 
-    RBPF.rbpf_filter(particles, params.us[t-1], params.ys1[t], models, A)
+    particles = RBPF.rbpf_filter(particles, params.us[t-1], params.ys1[t], models, A)
     params.rbpfmeans[:, t], params.rbpfcovars[:, :, t] = RBPF.get_ave_stats(particles)
     # rbpfmeans[:,t], rbpfcovars[:,:, t] = RBPF.getMLStats(particles)
 
@@ -64,7 +65,7 @@ for t in range(1, params.N):
         loc = numpy.where(particles.ss == k)[0]
         s = 0
         for l in loc:
-            s += particles.ws[loc]
+            s += particles.ws[l]
         switchtrack[k, t] = s
 
     maxtrack[:, t] = RBPF.get_max_track(particles, numModels)
@@ -77,3 +78,5 @@ Results.plot_switch_selection(numModels, switchtrack, params.ts, True)
 # Results.plotSwitchSelection(numModels, smoothedtrack, ts, false)
 Results.plot_tracking(params.ts, params.xs, params.ys1, params.rbpfmeans, params.us, 1)
 Results.calc_error(params.xs, params.rbpfmeans)
+plt.show()
+print("DONE")
