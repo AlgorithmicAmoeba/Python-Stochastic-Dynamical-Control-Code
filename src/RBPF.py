@@ -1,6 +1,8 @@
 # Rao Blackwellised Particle Filter
 # WARNING: this is made specifically for the system I am investigating
 import numpy
+import scipy.stats
+import copy
 import src.SPF as SPF
 
 print("RBPF is hardcoded for the CSTR!")
@@ -35,253 +37,240 @@ def setup_rbpf(linsystems, C, Q, R):
     return models, A
     
 
-"""
+def init_rbpf(sdist, mu_init, sigma_init, xN, nP):
+    """Initialise the particle filter."""
 
-function init_RBPF(sdist, mu_init, sigma_init, xN, nP)
-  # Initialise the particle filter.
+    particles = Particles(numpy.zeros([xN, nP]), numpy.zeros([xN, xN, nP]), numpy.zeros(nP), numpy.zeros(nP))
+    for p in range(nP):
+        sdraw = sdist.rvs()
+        particles.mus[:, p] = mu_init  # normal mu
+        particles.sigmas[:, :, p] = sigma_init
+        particles.ss[p] = sdraw
+        particles.ws[p] = 1/nP  # uniform initial weight
 
-  particles = Particles(zeros(xN, nP), zeros(xN, xN, nP), zeros(Int64, nP), zeros(nP))
-  for p=1:nP
-    sdraw = rand(sdist)
-    particles.mus[:, p] = mu_init # normal mu
-    particles.sigmas[:,:, p] = sigma_init
-    particles.ss[p] = sdraw
-    particles.ws[p] = 1./nP # uniform initial weight
-  end
-
-  return particles
-end
-
-function init_filter!(particles::Particles, u, y, models::Array{Model, 1})
-
-  nX, N = size(particles.mus)
-  nS = length(models)
-
-  for p=1:N
-    for s=1:nS
-      if particles.ss[p] == s
-        particles.mus[:,p] = particles.mus[:, p] - models[particles.ss[p]].b # adjust mu for specific switch
-        mu = models[s].C * (models[s].A*particles.mus[:, p] + models[s].B*u)
-        sigma = models[s].C * (models[s].A*particles.sigmas[:,:,p]*models[s].A' + models[s].Q) * models[s].C' + models[s].R
-        d = MvNormal(mu, sigma)
-        if length(y) == 1
-          particles.ws[p] = particles.ws[p]*pdf(d, [y-models[s].b[2]]) # HARDCODED for this system!!! ****************************NB
-        else
-          particles.ws[p] = particles.ws[p]*pdf(d, y-models[s].b) # weight of each particle
-        end
-        # println("Switch: ", s, " Predicts: ", round(mu + models[s].b, 4), "Observed: ", round(y,4), " Weight: ", round(particles.ws[p], 5))
-        particles.mus[:,p] = particles.mus[:, p] + models[particles.ss[p]].b # fix mu for specific switch
-
-      end
-    end
-  end
+    return particles
 
 
-  particles.ws = particles.ws ./ sum(particles.ws)
+def init_filter(particles, u, y, models):
 
-  if numberEffectiveParticles(particles) < N/2
-    resample!(particles, models)
-  end
-end
+    nX, N = particles.mus.shape
+    nS = len(models)
 
-function filter!(particles::Particles, u, y, models::Array{Model, 1}, A)
+    for p in range(N):
+        for s in range(nS):
+            if particles.ss[p] == s:
+                particles.mus[:, p] = particles.mus[:, p] - models[particles.ss[p]].b  # adjust mu for specific switch
+                mu = models[s].C @ (models[s].A @ particles.mus[:, p] + models[s].B*u)
+                temp = (models[s].A @ particles.sigmas[:, :, p] @ models[s].A.T + models[s].Q)
+                sigma = models[s].C @ temp @ models[s].C.T + models[s].R
 
-  nX, N = size(particles.mus)
-  nS = length(models)
+                d = scipy.stats.multivariate_normal(mean=mu, cov=sigma)
+                if len(y) == 1:
+                    particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[2]])  # HARDCODED for this system!!!
+                else:
+                    particles.ws[p] = particles.ws[p]*d.pdf(y-models[s].b)  # weight of each particle
+            # println("Switch: ", s, " Predicts: ", round(mu + models[s].b, 4), "Observed: ", round(y,4),
+            # " Weight: ", round(particles.ws[p], 5))
+            particles.mus[:, p] = particles.mus[:, p] + models[particles.ss[p]].b  # fix mu for specific switch
 
-  # This can be made more compact but at the cost of clarity
-  # first draw switch sample
-  for p=1:N
-    for s=1:nS
-      if particles.ss[p] == s
-        particles.ss[p] = rand(Categorical(A[:,s]))
-      end
-    end
-  end
+    particles.ws /= sum(particles.ws)
 
-  # apply KF and weight
-  for p=1:N
-    for s=1:nS
-      if particles.ss[p] == s
-        mu = models[s].C * (models[s].A*(particles.mus[:, p] - models[s].b) + models[s].B*u)
-        sigma = models[s].C * (models[s].A*particles.sigmas[:,:,p]*models[s].A' + models[s].Q) * models[s].C' + models[s].R
-        d = MvNormal(mu, sigma)
-        if length(y) == 1
-          particles.ws[p] = particles.ws[p]*pdf(d, [y-models[s].b[2]]) # HARDCODED for this system!!! ****************************NB
-        else
-          particles.ws[p] = particles.ws[p]*pdf(d, y-models[s].b) # weight of each particle
-        end
-        (isnan(particles.ws[p])) && (warn("Particle weight issue..."); particles.ws[p] = 0.0) # in case
+    if number_effective_particles(particles) < N/2:
+        particles = resample(particles)
 
-        # println("Switch: ", s, " Predicts: ", round(mu + models[s].b, 4), "Observed: ", round(y,4), " Weight: ", round(particles.ws[p], 5))
+    return particles
 
 
-        pmean = models[s].A*(particles.mus[:,p] - models[s].b) + models[s].B*u
-        pvar =  models[s].Q + models[s].A*particles.sigmas[:,:, p]*transpose(models[s].A)
-        kalmanGain = pvar*transpose(models[s].C)*inv(models[s].C*pvar*transpose(models[s].C) + models[s].R)
-        ypred = models[s].C*pmean #predicted measurement
-        if length(y) == 1
-          updatedMean = pmean + kalmanGain*(y - models[s].b[2] - ypred) # adjust for state space
-        else
-          updatedMean = pmean + kalmanGain*(y - models[s].b - ypred) # adjust for state space
-        end
-        rows, cols = size(pvar)
-        updatedVar = (eye(rows) - kalmanGain*models[s].C)*pvar
+def rbpf_filter(particles, u, y, models, A):
 
-        particles.sigmas[:,:, p] = updatedVar
-        particles.mus[:, p] = updatedMean + models[s].b # fix
-      end
-    end
-  end
+    nX, N = particles.mus.shape
+    nS = len(models)
 
-  # particles.ws = particles.ws .+ abs(minimum(particles.ws)) #no negative number issue
-  (maximum(particles.ws) < (1.0/(N^2))) && warn("The particles all have very small weight...")
-  (sum(particles.ws) == 0.0) && error("Zero cumulative weight...")
-  particles.ws = particles.ws ./ sum(particles.ws)
-  (true in isnan(particles.ws)) && error("Particles have become degenerate! (after normalisation)")
+    # This can be made more compact but at the cost of clarity
+    # first draw switch sample
+    for p in range(N):
+        for s in range(nS):
+            if particles.ss[p] == s:
+                particles.ss[p] = numpy.random.choice(range(len(A[:, s])), size=1, p=A[:, s])
 
 
-  if numberEffectiveParticles(particles) < N/2
-    resample!(particles,models)
-  end
-end
+# apply KF and weight
+    for p in range(N):
+        for s in range(nS):
+            if particles.ss[p] == s:
+                mu = models[s].C @ (models[s].A @ (particles.mus[:, p] - models[s].b) + models[s].B*u)
+                temp = (models[s].A @ particles.sigmas[:, :, p] @models[s].A.T + models[s].Q)
+                sigma = models[s].C @ temp @ models[s].C.T + models[s].R
+                d = scipy.stats.multivariate_normal(mean=mu, cov=sigma)
+                if len(y) == 1:
+                    particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[2]])  # HARDCODED for this system!!!
+                else:
+                    particles.ws[p] = particles.ws[p]*d.pdf(y-models[s].b)  # weight of each particle
 
-function resample!(particles::Particles, models::Array{Model, 1})
-  N = length(particles.ws)
-  resample = rand(Categorical(particles.ws), N) # draw N samples from weighted Categorical
-  copyparticles_mus = copy(particles.mus)
-  copyparticles_sigmas = copy(particles.sigmas)
-  copyparticles_ss = copy(particles.ss)
-  for p=1:N # resample
-    particles.mus[:,p] = copyparticles_mus[:, resample[p]]
-    particles.sigmas[:,:, p] = copyparticles_sigmas[:,:, resample[p]]
-    particles.ss[p] = copyparticles_ss[resample[p]]
-    particles.ws[p] = 1./N
-  end
-  roughen!(particles)
-end
+                if numpy.isnan(particles.ws[p]):
+                    print("Particle weight issue...")
+                    particles.ws[p] = 0.0
 
-function numberEffectiveParticles(particles::Particles)
-  # Return the effective number of particles.
-  N = length(particles.ws)
-  numeff = 0.0
-  for p=1:N
-    numeff += particles.ws[p]^2
-  end
-  return 1./numeff
-end
+                # println("Switch: ", s, " Predicts: ", round(mu + models[s].b, 4), "Observed: ", round(y,4),
+                # " Weight: ", round(particles.ws[p], 5))
 
-function roughen!(particles::Particles)
-  # Roughening the samples to promote diversity
-  xN, N = size(particles.mus)
-  sig = zeros(xN)
+                pmean = models[s].A @ (particles.mus[:, p] - models[s].b) + models[s].B*u
+                pvar = models[s].Q + models[s].A @ particles.sigmas[:, :, p] @ models[s].A.T
+                kalmanGain = pvar @ models[s].C.T @ numpy.linalg.inv(models[s].C @ pvar @ models[s].C.T + models[s].R)
+                ypred = models[s].C @ pmean  # predicted measurement
+                if len(y) == 1:
+                    updatedMean = pmean + kalmanGain @ (y - models[s].b[1] - ypred)  # adjust for state space
+                else:
+                    updatedMean = pmean + kalmanGain @ (y - models[s].b - ypred)  # adjust for state space
 
-  K= 0.2 # parameter...
-  flag = true
-  for k=1:xN
-    D = maximum(particles.mus[k,:]) - minimum(particles.mus[k,:])
-    if D == 0.0
-      warn("Particle distance very small! Roughening could cause problems...")
-      flag = false
-      break
-    end
-    sig[k] = K*D*N^(-1./xN)
-  end
+                rows, cols = pvar.shape
+                updatedVar = (numpy.eye(rows) - kalmanGain @ models[s].C) @ pvar
 
-  if flag
-    sigma = diagm(sig.^2)
-    jitter = MvNormal(sigma)
-    for p=1:N
-      particles.mus[:, p] = particles.mus[:, p] + rand(jitter)
-    end
-  end
-end
+                particles.sigmas[:, :, p] = updatedVar
+                particles.mus[:, p] = updatedMean + models[s].b  # fix
 
-function getAveStats(particles::Particles)
-  nX, nP = size(particles.mus)
-  ave = zeros(nX)
-  avesigma = zeros(nX, nX)
-  for p=1:nP
-    ave = ave + particles.ws[p]*particles.mus[:, p]
-    avesigma = avesigma + particles.ws[p].*particles.sigmas[:,:, p]
-  end
+    # particles.ws = particles.ws .+ abs(minimum(particles.ws)) #no negative number issue
+    if max(particles.ws) < (1.0/(N**2)):
+        print("The particles all have very small weight...")
 
-  return ave, avesigma
-end
+    if sum(particles.ws) == 0.0:
+        raise ValueError("Zero cumulative weight...")
 
-function getMLStats(particles::Particles)
-  nX, nP = size(particles.mus)
-  mlmu = zeros(nX)
-  mlsigma = zeros(nX, nX)
-  prevmaxweight = 0.0
-  for p=1:nP
-    if particles.ws[p] > prevmaxweight
-      mlmu = particles.mus[:, p]
-      mlsigma = particles.sigmas[:,:, p]
-      prevmaxweight = particles.ws[p]
-    end
-  end
+    particles.ws /= sum(particles.ws)
 
-  return mlmu, mlsigma
-end
+    for w in particles.ws:
+        if numpy.isnan(w):
+            raise ValueError("Particles have become degenerate! (after normalisation)")
 
-function getMaxTrack(particles, numSwitches)
-  maxtrack = zeros(numSwitches)
-  numParticles = length(particles.ws)
-  totals = zeros(numSwitches)
-  for p=1:numParticles
-    totals[particles.ss[p]] += particles.ws[p]
-  end
+    if number_effective_particles(particles) < N/2:
+        particles = resample(particles)
 
-  maxtrack[indmax(totals)] = 1.0
-  return maxtrack
-end
+    return particles
 
-function smoothedTrack(numSwitches, switchtrack, ind, N)
-  # returns a smoothed version of maxtrack given the history of the switch movements
-  sN = getHistory(ind, N) # number of time intervals backwards we look
-  modswitchtrack = sum(switchtrack[:, ind-sN:ind], 2)
-  modmaxtrack = zeros(numSwitches)
-  modmaxtrack[indmax(modswitchtrack)] = 1.0
-  return modmaxtrack
-end
 
-function getHistory(ind, N)
-  history = 0
-  flag = true
+def resample(particles):
+    N = len(particles.ws)
+    sample = numpy.random.choice(range(len(particles.ws)), size=N, p=particles.ws)
+    copyparticles_mus = copy.copy(particles.mus)
+    copyparticles_sigmas = copy.copy(particles.sigmas)
+    copyparticles_ss = copy.copy(particles.ss)
+    for p in range(N):  # resample
+        particles.mus[:, p] = copyparticles_mus[:, sample[p]]
+        particles.sigmas[:, :, p] = copyparticles_sigmas[:, :, sample[p]]
+        particles.ss[p] = copyparticles_ss[sample[p]]
+        particles.ws[p] = 1/N
 
-  for k=1:N
-    if ind-k == 0
-      history = k
-      flag = false
-      break
-    end
-  end
+    particles = roughen(particles)
+    return particles
 
-  if flag
-    history = N
-  end
 
-  return history-1
-end
+def number_effective_particles(particles):
+    """Return the effective number of particles."""
+    N = len(particles.ws)
+    numeff = 0.0
+    for p in range(N):
+        numeff += particles.ws[p]**2
 
-function getInitialSwitches(initial_states, linsystems::Array{Reactor.LinearReactor,1})
-  N = length(linsystems)
-  initstates = zeros(N) #pre-allocate
+    return 1/numeff
 
-  for i=1:N
-    initstates[i] = norm(linsystems[i].op-initial_states)
-  end
 
-  a = sort(initstates, rev=true)
-  posA = zeros(N)
-  for i=1:N
-    posA[i] = find((x)->x==initstates[i], a)[1]
-  end
+def roughen(particles):
+    """Roughening the samples to promote diversity"""
+    xN, N = particles.x.shape
+    sig = numpy.zeros(xN)
 
-  posA = posA./sum(posA,1)
+    K = 0.2  # parameter...
+    flag = True
+    for k in range(xN):
+        D = max(particles.mus[k, :]) - min(particles.mus[k, :])
+        if D == 0.0:
+            print("Particle distance very small! Roughening could cause problems...")
+            flag = False
+            break
+        sig[k] = K*D*N**(-1./xN)
 
-  return posA
-end
+    if flag:
+        sigma = numpy.diag(sig**2)
+        jitter = scipy.stats.multivariate_normal(cov=sigma)
+        for p in range(N):
+            particles.mus[:, p] = particles.mus[:, p] + jitter.rvs()
 
-end #module """
+    return particles
+
+
+def get_ave_stats(particles):
+    nX, nP = particles.mus.shape
+    ave = numpy.zeros(nX)
+    avesigma = numpy.zeros([nX, nX])
+    for p in range(nP):
+        ave = ave + particles.ws[p]*particles.mus[:, p]
+        avesigma = avesigma + particles.ws[p]  @ particles.sigmas[:, :, p]
+
+    return ave, avesigma
+
+
+def get_ml_stats(particles):
+    nX, nP = particles.mus.shape
+    mlmu = numpy.zeros(nX)
+    mlsigma = numpy.zeros([nX, nX])
+    prevmaxweight = 0.0
+    for p in range(nP):
+        if particles.ws[p] > prevmaxweight:
+            mlmu = particles.mus[:, p]
+            mlsigma = particles.sigmas[:, :, p]
+            prevmaxweight = particles.ws[p]
+
+    return mlmu, mlsigma
+
+
+def get_max_track(particles, numSwitches):
+    maxtrack = numpy.zeros(numSwitches)
+    numParticles = len(particles.ws)
+    totals = numpy.zeros(numSwitches)
+    for p in range(numParticles):
+        totals[particles.ss[p]] += particles.ws[p]
+
+    maxtrack[numpy.argmax(totals)[0]] = 1.0
+    return maxtrack
+
+
+def smoothed_track(numSwitches, switchtrack, ind, N):
+    """returns a smoothed version of maxtrack given the history of the switch movements"""
+    sN = get_history(ind, N)  # number of time intervals backwards we look
+    modswitchtrack = sum(switchtrack[:, ind-sN:ind], 2)
+    modmaxtrack = numpy.zeros(numSwitches)
+    modmaxtrack[numpy.argmax(modswitchtrack)[0]] = 1.0
+    return modmaxtrack
+
+
+def get_history(ind, N):
+    history = 0
+    flag = True
+
+    for k in range(N):
+        if ind-k == 0:
+            history = k
+            flag = False
+            break
+
+    if flag:
+        history = N
+
+    return history-1
+
+
+def get_initial_switches(initial_states, linsystems):
+    N = len(linsystems)
+    initstates = numpy.zeros(N)  # pre-allocate
+
+    for i in range(N):
+        initstates[i] = numpy.linalg.norm(linsystems[i].op-initial_states)
+
+    a = numpy.sort(initstates)[:: -1]
+    posA = numpy.zeros(N)
+    for i in range(N):
+        posA[i] = numpy.where(a == initstates[i])[0][0]
+
+    posA /= sum(posA, 1)
+
+    return posA
