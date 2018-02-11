@@ -133,7 +133,7 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
         if numerical:
             kldiv[ndivcounter] = Auxiliary.kl(particles.x, particles.w,
                                               params.pfmeans[:, 0], params.pfcovars[:, :, 0], temp_states)
-            basediv[ndivcounter] = Auxiliary.klbase(params.pfmeans[:,0], params.pfcovars[:, :, 0], temp_states, nP)
+            basediv[ndivcounter] = Auxiliary.klbase(params.pfmeans[:, 0], params.pfcovars[:, :, 0], temp_states, nP)
             unidiv[ndivcounter] = Auxiliary.kluniform(params.pfmeans[:, 0], params.pfcovars[:, :, 0], temp_states, nP)
             klts[ndivcounter] = 0.0
             ndivcounter += 1

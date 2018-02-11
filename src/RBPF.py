@@ -1,15 +1,18 @@
 # Rao Blackwellised Particle Filter
 # WARNING: this is made specifically for the system I am investigating
-print("RBPF is hardcoded for the CSTR!")
 import numpy
+import src.SPF as SPF
+
+print("RBPF is hardcoded for the CSTR!")
 
 
 class Particles:
     def __init__(self, mus, sigmas, ss, ws):
-        self.mus = mus # mean
-        self.sigmas = sigmas # covarience
-        self.ss = ss # switches
-        self.ws = ws # weights
+        self.mus = mus  # mean
+        self.sigmas = sigmas  # covarience
+        self.ss = ss  # switches
+        self.ws = ws  # weights
+
 
 class Model:
     def __init__(self, A, B, b, C, Q, R):
@@ -20,6 +23,7 @@ class Model:
         self.Q = Q
         self.R = R
 
+
 def setup_rbpf(linsystems, C, Q, R):
     """Setup each switch"""
     N = len(linsystems)
@@ -27,9 +31,10 @@ def setup_rbpf(linsystems, C, Q, R):
     for k in range(N):
         models[k] = Model(linsystems[k].A, linsystems[k].B, linsystems[k].b, C, Q, R)
         
-    A = SPF.calcA(linsystems)
+    A = SPF.calc_a(linsystems)
     return models, A
     
+
 """
 
 function init_RBPF(sdist, mu_init, sigma_init, xN, nP)

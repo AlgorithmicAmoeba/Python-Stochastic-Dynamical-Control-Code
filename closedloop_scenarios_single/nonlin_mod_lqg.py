@@ -46,7 +46,8 @@ params.us[0] = MPC.mpc_lqr(params.kfmeans[:, 0], horizon, A, numpy.matrix(B),
                            params.QQ, params.RR, numpy.array([0, 0]), numpy.array([0.0]))  # get the controller input
 
 for t in range(1, params.N):
-    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1],params.h) + state_noise_dist.rvs()
+    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+    params.xs[:, t] += state_noise_dist.rvs()
 
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
     temp = kf_cstr.step_filter(params.kfmeans[:, t - 1], params.kfcovars[:, :, t - 1], params.us[t - 1],

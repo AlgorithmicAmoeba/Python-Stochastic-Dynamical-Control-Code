@@ -3,18 +3,19 @@ import numpy
 import copy
 import scipy.stats
 
+
 class Particles:
     def __init__(self, x, s, w):
-        self.x = x # states
-        self.s = s # switches
-        self.w = w # weights
+        self.x = x  # states
+        self.s = s  # switches
+        self.w = w  # weights
         
 
 class Model:
-    def __init__(self, F, G, A, xdists, ysists):
-        self.F = F # transition
-        self.G = G # emission
-        self.A = A # HMM model, columns sum to 1
+    def __init__(self, F, G, A, xdists, ydists):
+        self.F = F  # transition
+        self.G = G  # emission
+        self.A = A  # HMM model, columns sum to 1
         self.xdists = xdists
         self.ydists = ydists
 
@@ -27,17 +28,18 @@ def init_spf(xdist, sdist, nP, xN):
     nX => number of states per particle
     Return an array of nP particles"""
 
-    particles = Particles(numpy.zeros([xN, nP]), numpy.zeros(nP, dtype=numpy.int64), zeros(nP))
+    particles = Particles(numpy.zeros([xN, nP]), numpy.zeros(nP, dtype=numpy.int64), numpy.zeros(nP))
     for p in range(nP):
         xdraw = xdist.rvs()
         sdraw = sdist.rvs()
         particles.x[:, p] = xdraw
         particles.s[p] = sdraw
-        particles.w[p] = 1/nP # uniform initial weight
+        particles.w[p] = 1/nP  # uniform initial weight
 
     return particles
 
-def init_filter(particles, u, y, model):
+
+def init_filter(particles, y, model):
 
     nX, N = particles.x.shape
     nS, _ = model.A.shape
@@ -45,18 +47,17 @@ def init_filter(particles, u, y, model):
     for p in range(N):
         for s in range(nS):
             if particles.s[p] == s:
-                particles.w[p] = particles.w[p]*model.ydists[s].pdf(y - model.G[s](particles.x[:, p])) # weight of each particle
-
+                particles.w[p] = particles.w[p]*model.ydists[s].pdf(y - model.G[s](particles.x[:, p]))
 
     # particles.w = particles.w .+ abs(minimum(particles.w)) #no negative number issue
     particles.w /= sum(particles.w)
 
-    if numberEffectiveParticles(particles) < N/2:
+    if number_effective_particles(particles) < N/2:
         particles = resample(particles)
     return particles
 
 
-def filter(particles, u, y, model):
+def spf_filter(particles, u, y, model):
 
     nX, N = particles.x.shape
     nS, = model.A.shape
@@ -66,15 +67,15 @@ def filter(particles, u, y, model):
     for p in range(N):
         for s in range(nS):
             if particles.s[p] == s:
-                particles.s[p] = numpy.random.choice(range(len(model.A[:,s]), size=1, p=model.A[:,s])
+                particles.s[p] = numpy.random.choice(range(len(model.A[:, s])), size=1, p=model.A[:, s])
                 # rand(Categorical(model.A[:,s]))
     # Now draw (predict) state sample
     for p in range(N):
         for s in range(nS):
             if particles.s[p] == s:
                 noise = model.xdists[s].rvs()
-                particles.x[:, p] = model.F[s](particles.x[:, p], u, noise) # predict
-                particles.w[p] = particles.w[p]*model.ydists[s].pdf(y - model.G[s](particles.x[:, p])) # weight of each particle
+                particles.x[:, p] = model.F[s](particles.x[:, p], u, noise)  # predict
+                particles.w[p] = particles.w[p]*model.ydists[s].pdf(y - model.G[s](particles.x[:, p]))
                 
                 if numpy.isnan(particles.w[p]):
                     print("Particle weight issue...")
@@ -88,8 +89,7 @@ def filter(particles, u, y, model):
         if numpy.isnan(w):
             raise ValueError("Particles have become degenerate!")
 
-
-    if numberEffectiveParticles(particles) < N/2:
+    if number_effective_particles(particles) < N/2:
         particles.resample(particles)
         
     return particles
@@ -97,16 +97,17 @@ def filter(particles, u, y, model):
     
 def resample(particles):
     N = len(particles.w)
-    resample = rand(Categorical(particles.w), N) # draw N samples from weighted Categorical
-    resample = numpy.random.choice(range(N), size=N, p=particles.w)
+    # sample = rand(Categorical(particles.w), N)  # draw N samples from weighted Categorical
+    sample = numpy.random.choice(range(N), size=N, p=particles.w)
     copyparticles_x = copy.copy(particles.x)
     copyparticles_s = copy.copy(particles.s)
-    for p in range(N): # resample
-        particles.x[:,p] = copyparticles_x[:, resample[p]]
-        particles.s[p] = copyparticles_s[resample[p]]
+    for p in range(N):  # resample
+        particles.x[:, p] = copyparticles_x[:, sample[p]]
+        particles.s[p] = copyparticles_s[sample[p]]
         particles.w[p] = 1/N
     particles = roughen(particles)
     return particles
+
 
 def number_effective_particles(particles):
     """Return the effective number of particles."""
@@ -117,25 +118,27 @@ def number_effective_particles(particles):
     
     return 1/numeff
 
+
 def roughen(particles):
     """Roughening the samples to promote diversity"""
     xN, N = particles.x.shape
     sig = numpy.zeros(xN)
 
-    K = 0.2 # parameter...
+    K = 0.2  # parameter...
 
     for k in range(xN):
-        D = max(particles.x[k,:]) - min(particles.x[k,:])
-        if D == 0
+        D = max(particles.x[k, :]) - min(particles.x[k, :])
+        if D == 0:
             print("Particle distance very small! Roughening could cause problems...")
         sig[k] = K*D*N**(-1/xN)
 
     sigma = numpy.diag(sig**2)
-    jitter = scipy.stats.MvNormal(sigma)
+    jitter = scipy.stats.multivariate_normal(cov=sigma)
     for p in range(N):
         particles.x[:, p] = particles.x[:, p] + jitter.rvs()
     
     return particles
+
 
 def get_stats(particles):
     """Return the Gaussian statistics of the particles."""
@@ -145,25 +148,26 @@ def get_stats(particles):
     
 
 def calc_a(linsystems):
-  """Returns a stochastic HMM matrix based on [need a good way to do this!!!]"""
-  N = len(linsystems)
-  A = numpy.zeros([N, N]) #pre-allocate A
+    """Returns a stochastic HMM matrix based on [need a good way to do this!!!]"""
+    N = len(linsystems)
+    A = numpy.zeros([N, N])  # pre-allocate A
 
-  for j in range(N):
-    for i in range(N):
-      A[i, j] = norm((linsystems[i].op-linsystems[j].op) / linsystems[j].op)
-      # A[i,j] = norm(linsystems[i].op-linsystems[j].op)
+    for j in range(N):
+        for i in range(N):
+            A[i, j] = numpy.linalg.norm((linsystems[i].op-linsystems[j].op) / linsystems[j].op)
+            # A[i,j] = norm(linsystems[i].op-linsystems[j].op)
 
-  posA = numpy.zeros([N,N])
+    posA = numpy.zeros([N, N])
 
-  for j in range(N):
-    a = numpy.sort(A[:, j])[::-1]
-    for i in range(N):
-        posA[i,j] = numpy.where(a == A[i, j])[0][0]
+    for j in range(N):
+        a = numpy.sort(A[:, j])[::-1]
+        for i in range(N):
+            posA[i, j] = numpy.where(a == A[i, j])[0][0]
 
-  posA /= sum(posA,1)
+    posA /= sum(posA, 1)
 
-  return posA
+    return posA
+
 
 def get_f(linsystems):
     """Return transmission function matrices"""
@@ -183,10 +187,11 @@ def get_g(linsystems, C):
     G = [None]*N
     for k in range(N):
         def g(x):
-            C @ x
+            return C @ x
         G[k] = g
 
     return G
+
 
 def get_dists(linsystems, dist):
     N = len(linsystems)
