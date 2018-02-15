@@ -121,7 +121,7 @@ def plot_state_space_switch(linsystems, xs):
                      ha="center",
                      va="bottom")
         
-    plt.plot(xs[0], xs[1], str(k+1), linewidth=3)
+    plt.plot(xs[0], xs[1], "k", linewidth=3)
     plt.plot(xs[0][0], xs[1][0], "ko", markersize=10, markeredgewidth=4)
     plt.plot(xs[0][-1], xs[1][-1], "kx", markersize=10, markeredgewidth=4)
     plt.xlim([-0.1, 1.1])
