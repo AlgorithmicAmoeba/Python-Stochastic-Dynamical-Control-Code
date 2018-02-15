@@ -119,7 +119,7 @@ def rbpf_filter(particles, u, y, models, A):
                 if not isinstance(y, collections.Iterable):
                     updatedMean = pmean + kalmanGain @ (y - models[s].b[1] - ypred)  # adjust for state space
                 else:
-                    updatedMean = pmean + kalmanGain @ (numpy.subtract(y, models[s].b) - ypred)  # adjust for state space
+                    updatedMean = pmean + kalmanGain @ (numpy.subtract(y, models[s].b) - ypred)  # adjust state space
 
                 rows, cols = pvar.shape
                 updatedVar = (numpy.eye(rows) - kalmanGain @ models[s].C) @ pvar
