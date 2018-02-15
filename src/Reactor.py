@@ -102,12 +102,12 @@ class Reactor:
 
     def discretise(self, nX, nY, xspace, yspace):
         """Discrete the state space into nX*nY regions."""
-        dx = (xspace[2] - xspace[1])/nX
-        dy = (yspace[2] - yspace[1])/nY
+        dx = (xspace[1] - xspace[0])/nX
+        dy = (yspace[1] - yspace[0])/nY
 
         operatingpoints = numpy.zeros([2, nX*nY + 3])  # add the three nominal points
 
-        k = 1  # counter
+        k = 0  # counter
         for x in range(nX):
             xnow = dx*(x-1) + xspace[1] + dx*0.5
             for y in range(nY):
