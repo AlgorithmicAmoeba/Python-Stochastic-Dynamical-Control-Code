@@ -109,9 +109,9 @@ class Reactor:
 
         k = 0  # counter
         for x in range(nX):
-            xnow = dx*(x-1) + xspace[1] + dx*0.5
+            xnow = dx*x + xspace[0] + dx*0.5
             for y in range(nY):
-                ynow = dy*(y-1) + yspace[1] + dy*0.5
+                ynow = dy*y + yspace[0] + dy*0.5
                 operatingpoints[:, k] = [xnow, ynow]
                 k += 1
         operatingpoints[:, k] = [0.009718824131074055, 508.0562351737852]
