@@ -74,8 +74,8 @@ for t in range(1, params.N):
 # Plot results
 Results.plot_state_space_switch(linsystems, params.xs)
 Results.plot_switch_selection(numModels, switchtrack, params.ts, True)
-# Results.plotSwitchSelection(numModels, maxtrack, ts, false)
-# Results.plotSwitchSelection(numModels, smoothedtrack, ts, false)
+# Results.plot_switch_selection(numModels, maxtrack, ts, false)
+# Results.plot_switch_selection(numModels, smoothedtrack, ts, false)
 Results.plot_tracking(params.ts, params.xs, params.ys1, params.rbpfmeans, params.us, 1)
 Results.calc_error(params.xs, params.rbpfmeans)
 plt.show()
