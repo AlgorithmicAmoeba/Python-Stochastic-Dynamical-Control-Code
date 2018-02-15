@@ -66,10 +66,10 @@ def init_filter(particles, u, y, models):
 
                 d = scipy.stats.multivariate_normal(mean=mu, cov=sigma)
 
-                if not isinstance(y, collections.Sequence):
+                if not isinstance(y, collections.Iterable):
                     particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[1]])  # HARDCODED for this system!!!
                 else:
-                    particles.ws[p] = particles.ws[p]*d.pdf(y-models[s].b)  # weight of each particle
+                    particles.ws[p] = particles.ws[p]*d.pdf(numpy.subtract(y, models[s].b))  # weight of each particle
             # println("Switch: ", s, " Predicts: ", round(mu + models[s].b, 4), "Observed: ", round(y,4),
             # " Weight: ", round(particles.ws[p], 5))
                 particles.mus[:, p] = particles.mus[:, p] + models[particles.ss[p]].b  # fix mu for specific switch
@@ -100,10 +100,10 @@ def rbpf_filter(particles, u, y, models, A):
                 temp = (models[s].A @ particles.sigmas[:, :, p] @ models[s].A.T + models[s].Q)
                 sigma = models[s].C @ temp @ models[s].C.T + models[s].R
                 d = scipy.stats.multivariate_normal(mean=mu, cov=sigma)
-                if not isinstance(y, collections.Sequence):
+                if not isinstance(y, collections.Iterable):
                     particles.ws[p] = particles.ws[p]*d.pdf([y-models[s].b[1]])  # HARDCODED for this system!!!
                 else:
-                    particles.ws[p] = particles.ws[p]*d.pdf(y-models[s].b)  # weight of each particle
+                    particles.ws[p] = particles.ws[p]*d.pdf(numpy.subtract(y, models[s].b))  # weight of each particle
 
                 if numpy.isnan(particles.ws[p]):
                     print("Particle weight issue...")
@@ -116,10 +116,10 @@ def rbpf_filter(particles, u, y, models, A):
                 pvar = models[s].Q + models[s].A @ particles.sigmas[:, :, p] @ models[s].A.T
                 kalmanGain = pvar @ models[s].C.T @ numpy.linalg.inv(models[s].C @ pvar @ models[s].C.T + models[s].R)
                 ypred = models[s].C @ pmean  # predicted measurement
-                if not isinstance(y, collections.Sequence):
+                if not isinstance(y, collections.Iterable):
                     updatedMean = pmean + kalmanGain @ (y - models[s].b[1] - ypred)  # adjust for state space
                 else:
-                    updatedMean = pmean + kalmanGain @ (y - models[s].b - ypred)  # adjust for state space
+                    updatedMean = pmean + kalmanGain @ (numpy.subtract(y, models[s].b) - ypred)  # adjust for state space
 
                 rows, cols = pvar.shape
                 updatedVar = (numpy.eye(rows) - kalmanGain @ models[s].C) @ pvar
@@ -260,7 +260,6 @@ def get_history(ind, N):
 def get_initial_switches(initial_states, linsystems):
     N = len(linsystems)
     initstates = numpy.zeros(N)  # pre-allocate
-
 
     for i in range(N):
         initstates[i] = numpy.linalg.norm(linsystems[i].op-initial_states)
