@@ -45,7 +45,7 @@ for k in range(len(linsystems)):
     for l in loc:
         s += particles.ws[l]
 
-    switchtrack[k, 1] = s
+    switchtrack[k, 0] = s
 
 maxtrack[:, 0] = RBPF.get_max_track(particles, numModels)
 smoothedtrack[:, 0] = RBPF.smoothed_track(numModels, switchtrack, 1, 10)
