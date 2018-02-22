@@ -171,7 +171,7 @@ def mpc_lqr(x0, N, A, B, QQ, RR, ysp, usp):
 
     bb = numpy.hstack([-x0, numpy.zeros(N * nx)])
 
-    n = q.shape[0]
+    n = max(q.shape)
     x = cvxpy.Variable(n)
     P = cvxpy.Constant(P)
     objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, P) + q * x)

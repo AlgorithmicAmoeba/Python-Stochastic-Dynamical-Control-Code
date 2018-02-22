@@ -26,7 +26,7 @@ b = linsystems[opoint].b  # offset from the origin
 # Set point
 ysp = linsystems[opoint].op[0] - b[0]  # Medium concentration
 H = numpy.matrix([1, 0])  # only attempt to control the concentration
-x_off, usp = LQR.offset(A, numpy.matrix(B), params.C2, H, numpy.array([ysp]))  # control offset
+x_off, usp = LQR.offset(A, numpy.matrix(B), params.C2, H, numpy.matrix([ysp]))  # control offset
 ysp = x_off
 usp = numpy.array([usp])
 
