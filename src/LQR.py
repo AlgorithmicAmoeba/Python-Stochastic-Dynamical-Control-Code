@@ -1,5 +1,6 @@
 #  LQR Controller
 import numpy
+import collections
 
 
 class Controller:
@@ -14,7 +15,7 @@ def lqr(A, B, Q, R):
     Don't confuse the weighting matrices Q and R with
     the noise covariance matrices!"""
     P = dare(A, B, Q, R)
-    F = numpy.linalg.inv(R+B.T @ P @ B) @ B.T @ P @ A
+    F = numpy.linalg.inv(R+B @ P @ B.T) @ B @ P @ A
     return F
 
 
@@ -25,7 +26,11 @@ def dare(A, B, Q, R):
     counter = 0
     while True:
         counter += 1
-        Pnow = Q + A.T @ P @ A - A.T @ P @ B @ numpy.linalg.inv(B.T @ P @ B + R) @ B.T @ P @ A
+        if isinstance(B @ P @ B.T + R, collections.Iterable):
+            inv = numpy.linalg.inv(B @ P @ B.T + R)
+        else:
+            inv = numpy.matrix(1/(B @ P @ B.T + R))
+        Pnow = Q + A.T @ P @ A - A.T @ P @ B.T @ inv @ B @ P @ A
         if numpy.linalg.norm(Pnow-P, ord=numpy.inf) < 1E-06:
             P = Pnow
             return P
@@ -45,18 +50,19 @@ def inv(x):
 
 def offset(A, B, C, H, ysp):
     """Returns the state and controller offset."""
+    B = numpy.matrix(B)
     B = B.T
     rA, cA = get_size(A)
     rB, cB = B.shape
     rC, cC = get_size(C)
     rH, cH = H.shape
-    lenysp, = ysp.shape
+    lenysp, _ = ysp.shape
     if cA+cB-cC == 0:
         z1 = numpy.zeros(rA+rH-rB)
     else:
         z1 = numpy.zeros([rA+rH-rB, cA+cB-cC])
 
-    z2 = numpy.zeros(rA+rH-lenysp)
+    z2 = numpy.matrix(numpy.zeros(rA+rH-lenysp))
     ssvec = numpy.matrix(numpy.hstack([z2, ysp]))
     ssmat = numpy.vstack([numpy.hstack([numpy.eye(rA)-A, -B]), numpy.hstack([H @ C, z1])])
 
