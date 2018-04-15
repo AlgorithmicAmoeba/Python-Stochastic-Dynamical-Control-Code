@@ -43,7 +43,7 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
     # Set point
     ysp = linsystems[opoint].op[0] - b[0]  # Medium concentration
     H = numpy.matrix([1, 0])  # only attempt to control the concentration
-    x_off, usp = LQR.offset(A, numpy.matrix(B), params.C2, H, numpy.array([ysp]))  # control offset
+    x_off, usp = LQR.offset(A, numpy.matrix(B), params.C2, H, numpy.matrix([ysp]))  # control offset
     ysp = x_off
     usp = numpy.array([usp])
 
@@ -92,7 +92,8 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
     xconcen = numpy.zeros([params.N, mcN])
     mcerrs = numpy.zeros(mcN)
 
-    for mciter in range(mcN):
+    mciter = -1
+    while mciter < mcN-1:
         # First time step of the simulation
         if linear:
             params.xs[:, 0] = init_state - b  # set simulation starting point to the random initial state
@@ -137,6 +138,7 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
             unidiv[ndivcounter] = Auxiliary.kluniform(params.pfmeans[:, 0], params.pfcovars[:, :, 0], temp_states, nP)
             klts[ndivcounter] = 0.0
             ndivcounter += 1
+        status = True
         for t in range(1, params.N):
             if linear:
                 params.xs[:, t] = A @ params.xs[:, t-1] + B*params.us[t-1] + state_noise_dist.rvs()  # actual plant
@@ -171,6 +173,7 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
                                                usp[0], limu, 1000, params.Q, k_squared, growvar)  # get controller input
 
                 if params.us[t] is None or numpy.isnan(params.us[t]):
+                    status = False
                     break
             else:
                 params.us[t] = params.us[t-1]
@@ -185,6 +188,10 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
                 klts[ndivcounter] = params.ts[t]
                 ndivcounter += 1
 
+        if not status:
+            continue
+        else:
+            mciter += 1
         for i in range(len(params.kfmeans[0])):
             params.kfmeans[:, i] += b
             if linear:
@@ -194,7 +201,8 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
         if mcN > 1:
             xconcen[:, mciter] = params.xs[0, :]
             mcerrs[mciter] = Results.calc_error1(params.xs, ysp[0] + b[0])
-            Results.get_mc_res(params.xs, params.kfcovars, [aline, cline], mcdists, mciter, params.h)
+            mcdists = Results.get_mc_res(params.xs, params.kfcovars, [aline, cline], mcdists, mciter, params.h)
+
         if mcN == 1:
             # Plot the results
 
@@ -207,7 +215,7 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
             elif pf:
                 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.pfmeans, params.us, 2, ysp[0] + b[0])
                 Results.plot_ellipses2(params.ts, params.xs, params.pfmeans, params.pfcovars,
-                                       [aline, cline], linsystems[1].op, True, -2.0 * numpy.log(1 - 0.9), 1, "best")
+                                       [aline, cline], linsystems[1].op, True, -2.0 * numpy.log(1 - 0.9), plot_setting, "best")
                 Results.check_constraint(params.ts, params.xs, [aline, cline])
                 Results.calc_error1(params.xs, ysp[0] + b[0])
                 Results.calc_energy(params.us, 0.0)
@@ -224,6 +232,36 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
     if mcN != 1:
         print("The absolute MC average error is: ", sum(abs(mcerrs)) / mcN)
         if linear:
-            numpy.savetxt("linmod_kf_var{}_mc.csv".format(nine), xconcen, delimiter=",")
+            if pf:
+                numpy.savetxt("linmod_pf_var{}_mc2.csv".format(nine), xconcen, delimiter=",", fmt="%f")
+            else:
+                numpy.savetxt("linmod_kf_var{}_mc2.csv".format(nine), xconcen, delimiter=",", fmt="%f")
         else:
-            numpy.savetxt("nonlinmod_kf_var{}_mc.csv".format(nine), xconcen, delimiter=",")
+            if pf:
+                numpy.savetxt("nonlinmod_pf_var{}_mc2.csv".format(nine), xconcen, delimiter=",", fmt="%f")
+            else:
+                numpy.savetxt("nonlinmod_kf_var{}_mc2.csv".format(nine), xconcen, delimiter=",", fmt="%f")
+
+        nocount = len(mcdists[0]) - numpy.count_nonzero(mcdists[0])
+        filteredResults = numpy.zeros([2, mcN - nocount])
+        counter = 0
+        for k in range(mcN):
+            if mcdists[0, k] != 0.0:
+                filteredResults[:, counter] = mcdists[:, k]
+                counter += 1
+
+        if linear:
+            if pf:
+                numpy.savetxt("linmod_pf_var{}_mc.csv".format(nine), filteredResults, delimiter=",",
+                              fmt="%f")
+            else:
+                numpy.savetxt("linmod_kf_var{}_mc.csv".format(nine), filteredResults, delimiter=",",
+                              fmt="%f")
+        else:
+            if pf:
+                numpy.savetxt("nonlinmod_pf_var{}_mc.csv".format(nine), filteredResults, delimiter=",",
+                              fmt="%f")
+            else:
+                numpy.savetxt("nonlinmod_kf_var{}_mc.csv".format(nine), filteredResults, delimiter=",",
+                              fmt="%f")
+
