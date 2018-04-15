@@ -21,7 +21,7 @@ mc4 = abs(pandas.read_csv("nonlinmod_kf_var999_mc2.csv", header=None).as_matrix(
 
 
 rows, cols = mc1.shape  # all will have the same dimension
-ts = [x/10 for x in range(801)]
+ts = [x/10 for x in range(800)]
 
 # Now plot 90 % confidence regions!
 plt.figure()

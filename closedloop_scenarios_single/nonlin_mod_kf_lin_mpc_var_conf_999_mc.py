@@ -3,4 +3,4 @@
 
 import closedloop_scenarios_single.lin_mpc_var_conf
 
-closedloop_scenarios_single.lin_mpc_var_conf.main(999, mcN=2, linear=False)
+closedloop_scenarios_single.lin_mpc_var_conf.main(999, mcN=200, linear=False)

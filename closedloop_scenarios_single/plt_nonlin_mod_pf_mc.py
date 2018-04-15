@@ -14,10 +14,10 @@ import src.Ellipse as Ellipse
 mpc.rc("font", family="serif", serif="Computer Modern", size=12)
 mpc.rc("text", usetex=True)
 
-mc1 = abs(pandas.read_csv("nonlinmod_kf_mean.csv", header=None).as_matrix())
-mc2 = abs(pandas.read_csv("nonlinmod_kf_var90.csv", header=None).as_matrix())
-mc3 = abs(pandas.read_csv("nonlinmod_pf_mean.csv", header=None).as_matrix())
-mc4 = abs(pandas.read_csv("nonlinmod_pf_var90.csv", header=None).as_matrix())
+mc1 = abs(pandas.read_csv("nonlinmod_kf_mean_mc.csv", header=None).as_matrix())
+mc2 = abs(pandas.read_csv("nonlinmod_kf_var90_mc.csv", header=None).as_matrix())
+mc3 = abs(pandas.read_csv("nonlinmod_pf_mean_mc.csv", header=None).as_matrix())
+mc4 = abs(pandas.read_csv("nonlinmod_pf_var90_mc.csv", header=None).as_matrix())
 
 
 mc1 = Auxiliary.remove_outliers(mc1, 3)
