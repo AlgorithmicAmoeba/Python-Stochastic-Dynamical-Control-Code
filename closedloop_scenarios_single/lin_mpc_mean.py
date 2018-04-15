@@ -30,7 +30,7 @@ def main(mcN=1, linear=True, pf=False):
     # Set point
     ysp = linsystems[opoint].op[0] - b[0]  # Medium concentration
     H = numpy.matrix([1, 0])  # only attempt to control the concentration
-    x_off, usp = LQR.offset(A, numpy.matrix(B), params.C2, H, numpy.array([ysp]))  # control offset
+    x_off, usp = LQR.offset(A, numpy.matrix(B), params.C2, H, numpy.matrix([ysp]))  # control offset
     ysp = x_off
     usp = numpy.array([usp])
 
@@ -161,6 +161,35 @@ def main(mcN=1, linear=True, pf=False):
     if mcN != 1:
         print("The absolute MC average error is: ", sum(abs(mcerrs)) / mcN)
         if linear:
-            numpy.savetxt("linmod_kf_mean_mc2.csv", xconcen, delimiter=",")
+            if pf:
+                numpy.savetxt("linmod_pf_mean_mc2.csv", xconcen, delimiter=",")
+            else:
+                numpy.savetxt("linmod_kf_mean_mc2.csv", xconcen, delimiter=",")
         else:
-            numpy.savetxt("nonlinmod_kf_mean_mc2.csv", xconcen, delimiter=",")
+            if pf:
+                numpy.savetxt("nonlinmod_pf_mean_mc2.csv", xconcen, delimiter=",")
+            else:
+                numpy.savetxt("nonlinmod_kf_mean_mc2.csv", xconcen, delimiter=",")
+
+    nocount = len(mcdists[0]) - numpy.count_nonzero(mcdists[0])
+    filteredResults = numpy.zeros([2, mcN - nocount])
+    counter = 0
+    for k in range(mcN):
+        if mcdists[0, k] != 0.0:
+            filteredResults[:, counter] = mcdists[:, k]
+            counter += 1
+
+    if linear:
+        if pf:
+            numpy.savetxt("linmod_pf_mean_mc.csv", filteredResults, delimiter=",",
+                          fmt="%f")
+        else:
+            numpy.savetxt("linmod_kf_mean_mc.csv", filteredResults, delimiter=",",
+                          fmt="%f")
+    else:
+        if pf:
+            numpy.savetxt("nonlinmod_pf_mean_mc.csv", filteredResults, delimiter=",",
+                          fmt="%f")
+        else:
+            numpy.savetxt("nonlinmod_kf_mean_mc.csv", filteredResults, delimiter=",",
+                          fmt="%f")
