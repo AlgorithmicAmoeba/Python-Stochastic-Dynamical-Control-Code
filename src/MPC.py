@@ -60,7 +60,10 @@ def mpc_mean(x0, N, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, lim_u, lim_s
     constraints = [GG * x <= U, GG * x >= L, AA * x == bb]
 
     prob = cvxpy.Problem(objective, constraints)
-    prob.solve(solver='MOSEK')
+    try:
+        prob.solve(solver='MOSEK')
+    except:
+        return None
     if prob.status != "optimal":
         print(prob.status)
         print(prob.is_qp())
@@ -137,7 +140,11 @@ def mpc_var(x0, cov0, N, A, B, b, aline, bline, cline, QQ, RR,
     constraints = [GG * x <= U, GG * x >= L, AA * x == bb]
 
     prob = cvxpy.Problem(objective, constraints)
-    prob.solve(solver='MOSEK')
+
+    try:
+        prob.solve(solver='MOSEK')
+    except:
+        return None
     if prob.status != "optimal":
         print(prob.status)
         print(prob.is_qp())
