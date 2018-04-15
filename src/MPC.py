@@ -62,7 +62,7 @@ def mpc_mean(x0, N, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, lim_u, lim_s
     prob = cvxpy.Problem(objective, constraints)
     try:
         prob.solve(solver='MOSEK')
-    except:
+    except RuntimeError:
         return None
     if prob.status != "optimal":
         print(prob.status)
@@ -143,7 +143,7 @@ def mpc_var(x0, cov0, N, A, B, b, aline, bline, cline, QQ, RR,
 
     try:
         prob.solve(solver='MOSEK')
-    except:
+    except RuntimeError:
         return None
     if prob.status != "optimal":
         print(prob.status)

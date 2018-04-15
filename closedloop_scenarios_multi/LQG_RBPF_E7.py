@@ -8,6 +8,7 @@ import src.RBPF as RBPF
 import src.LQR as LQR
 import src.MPC as MPC
 import matplotlib.pyplot as plt
+import typing
 
 tend = 200
 params = params.Params(tend)
@@ -31,7 +32,7 @@ A = numpy.array([[0.98, 0.00, 0.00, 0.00, 0.00, 0.01, 0.00],
                  [0.00, 0.00, 0.01, 0.00, 0.00, 0.00, 0.99]])
 numModels = len(models)
 
-nP = 500 # number of particles
+nP = 500  # number of particles
 init_state = linsystems[5].op
 
 sguess = RBPF.get_initial_switches(init_state, linsystems)
@@ -43,7 +44,7 @@ maxtrack = numpy.zeros([len(linsystems), params.N])
 # # Setup the controllers
 setpoint = linsystems[6].op[0]
 H = numpy.matrix([1.0, 0.0])
-controllers = [None]*len(models)
+controllers = [None]*len(models)  # type: typing.List[LQR.Controller]
 for k in range(len(models)):
     ysp = numpy.matrix(setpoint - models[k].b[0])  # set point is set here
     x_off, u_off = LQR.offset(models[k].A, models[k].B, params.C2, H, ysp)
@@ -70,7 +71,7 @@ for k in range(len(linsystems)):
 maxtrack[:, 0] = RBPF.get_max_track(particles, numModels)
 
 # Controller Input
-ind = numpy.argmax(maxtrack[:, 0]) # use this model and controller
+ind = numpy.argmax(maxtrack[:, 0])[0]  # use this model and controller
 horizon = 150
 
 params.us[0] = MPC.mpc_lqr(params.rbpfmeans[:, 0] - models[ind].b, horizon, models[ind].A, numpy.matrix(models[ind].B),
@@ -96,7 +97,7 @@ for t in range(1, params.N):
 
     # Controller Input
     if t % 1 == 0:
-        ind = numpy.argmax(maxtrack[:, t])  # use this model and controller
+        ind = numpy.argmax(maxtrack[:, t])[0]  # use this model and controller
         params.us[t] = MPC.mpc_lqr(params.rbpfmeans[:, t] - models[ind].b, horizon, models[ind].A,
                                    numpy.matrix(models[ind].B),
                                    numpy.matrix(params.QQ), numpy.matrix(params.RR),

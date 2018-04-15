@@ -69,6 +69,7 @@ def main(mcN=1, linear=True, pf=False):
     mcdists = numpy.zeros([2, mcN])
     xconcen = numpy.zeros([params.N, mcN])
     mcerrs = numpy.zeros(mcN)
+    particles = None
 
     for mciter in range(mcN):
         # First time step of the simulation

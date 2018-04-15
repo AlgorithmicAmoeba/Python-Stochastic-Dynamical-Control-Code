@@ -27,10 +27,10 @@ def dare(A, B, Q, R):
     while True:
         counter += 1
         if isinstance(B @ P @ B.T + R, collections.Iterable):
-            inv = numpy.linalg.inv(B @ P @ B.T + R)
+            inverse = numpy.linalg.inv(B @ P @ B.T + R)
         else:
-            inv = numpy.matrix(1/(B @ P @ B.T + R))
-        Pnow = Q + A.T @ P @ A - A.T @ P @ B.T @ inv @ B @ P @ A
+            inverse = numpy.matrix(1 / (B @ P @ B.T + R))
+        Pnow = Q + A.T @ P @ A - A.T @ P @ B.T @ inverse @ B @ P @ A
         if numpy.linalg.norm(Pnow-P, ord=numpy.inf) < 1E-06:
             P = Pnow
             return P

@@ -67,7 +67,6 @@ plt.xlabel("Mahalanobis area in violation")
 plt.ylabel("Time in violation [min]")
 plt.legend(["Expected value constraint",
             r"90$\%$ Chance constraint",
-            r"99$\%$ Chance constraint",],
-            # r"99.9$\%$ Chance constraint"],
+            r"99$\%$ Chance constraint"],  # r"99.9$\%$ Chance constraint"],
            loc="best")
 plt.show()

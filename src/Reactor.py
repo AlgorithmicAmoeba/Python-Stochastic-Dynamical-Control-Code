@@ -1,6 +1,7 @@
 import numpy
 import random
 import scipy.optimize
+import typing
 
 
 class LinearReactor:
@@ -145,7 +146,7 @@ class Reactor:
         """Returns an array of linearised systems"""
 
         N = nX*nY + 3  # add the three nominal operating points
-        linsystems = [None]*N
+        linsystems = [None]*N  # type: typing.List[LinearReactor]
         ops = self.discretise(nX, nY, xspace, yspace)
         for k in range(N):
             op = ops[:, k]
@@ -158,7 +159,7 @@ class Reactor:
         """Returns an array of linearised systems"""
 
         N = npoints + 3  # add the three nominal operating points
-        linsystems = [None]*N
+        linsystems = [None]*N  # type: typing.List[LinearReactor]
         ops = self.discretise_randomly(npoints, xspace, yspace)
         for k in range(N):
             op = ops[:, k]
@@ -170,7 +171,7 @@ class Reactor:
     def get_nominal_linear_systems(self, h):
         """Returns an array of linearised systems"""
 
-        linsystems = [None]*3
+        linsystems = [None]*3  # type: typing.List[LinearReactor]
 
         # Get the steady state points
         xguess1 = [0.073, 493.0]

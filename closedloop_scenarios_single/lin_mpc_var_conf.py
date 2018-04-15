@@ -93,6 +93,8 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
     mcerrs = numpy.zeros(mcN)
 
     mciter = -1
+
+    particles = None
     while mciter < mcN-1:
         # First time step of the simulation
         if linear:
@@ -214,8 +216,8 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
                 print("The average divergence for the uniform is: ", 1.0 / len(klts) * sum(unidiv))
             elif pf:
                 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.pfmeans, params.us, 2, ysp[0] + b[0])
-                Results.plot_ellipses2(params.ts, params.xs, params.pfmeans, params.pfcovars,
-                                       [aline, cline], linsystems[1].op, True, -2.0 * numpy.log(1 - 0.9), plot_setting, "best")
+                Results.plot_ellipses2(params.ts, params.xs, params.pfmeans, params.pfcovars, [aline, cline],
+                                       linsystems[1].op, True, -2.0 * numpy.log(1 - 0.9), plot_setting, "best")
                 Results.check_constraint(params.ts, params.xs, [aline, cline])
                 Results.calc_error1(params.xs, ysp[0] + b[0])
                 Results.calc_energy(params.us, 0.0)

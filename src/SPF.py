@@ -2,6 +2,7 @@
 import numpy
 import copy
 import scipy.stats
+import typing
 
 
 class Particles:
@@ -172,7 +173,7 @@ def calc_a(linsystems):
 def get_f(linsystems):
     """Return transmission function matrices"""
     N = len(linsystems)
-    F = [None]*N
+    F = [None]*N  # type: typing.List[(typing.Any, typing.Any)->typing.Any]
     for k in range(N):
         def f(x, u, w):
             return linsystems[k].A @ x + linsystems[k].B*u + w
@@ -184,7 +185,7 @@ def get_f(linsystems):
 def get_g(linsystems, C):
     """Return emission function matrices"""
     N = len(linsystems)
-    G = [None]*N
+    G = [None]*N  # type: typing.List[typing.Any->typing.Any]
     for k in range(N):
         def g(x):
             return C @ x
