@@ -432,6 +432,7 @@ def get_mc_res(xs, sigmas, line, mcdistmat, counter, h):
 
     mcdistmat[0, counter] = negdist*h  # area integral
     mcdistmat[1, counter] = timeviolated*h  # in minutes
+    return mcdistmat
 
 
 
