@@ -53,7 +53,7 @@ xs4, ys4 = Ellipse.ellipse(mmc4, cmc4)
 cs4 = plt.fill(xs4, ys4, "b", alpha=a, edgecolor="none")
 plt.plot(mmc4[0], mmc4[1], "bo", markersize=10)
 
-plt.axis(ymin=0.0, xmin=0.0, ymax=3.6, xmax=6)
+plt.axis(ymin=0.0, xmin=0.0, ymax=2.5, xmax=30)
 #
 # # Magenta = mean
 # # Red = 90%
@@ -62,8 +62,8 @@ plt.axis(ymin=0.0, xmin=0.0, ymax=3.6, xmax=6)
 plt.xlabel("Mahalanobis area in violation")
 plt.ylabel("Time in violation [min]")
 plt.legend(["Expected value constraint KF",
-            "Expected value constraint PF",
             r"90$\%$ Chance constraint KF",
+            "Expected value constraint PF",
             r"90$\%$ Chance constraint PF"],
            loc="best")
 
