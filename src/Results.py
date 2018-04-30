@@ -274,7 +274,7 @@ def plot_tracking_break(ts, xs, xsb, ys, fmeans, obs):
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
     plt.plot(ts, xsb[0, :], "g--", linewidth=3)
     if obs == 2:
-        plt.plot(ts[::skipm], ys[::skipm], "kx", markersize=5, markeredgewidth=1)
+        plt.plot(ts[::skipm], ys[0][::skipm], "kx", markersize=5, markeredgewidth=1)
     
     k1, = plt.plot(ts, fmeans[0, :], "r--", linewidth=3)
     plt.ylabel(r"C$_A$ [kmol.m$^{-3}$]")
@@ -282,14 +282,14 @@ def plot_tracking_break(ts, xs, xsb, ys, fmeans, obs):
     plt.legend([x1, k1], ["Underlying model", "Filtered mean"], loc="best")
     plt.xlim([0, tend])
     plt.subplot(2, 1, 2)
-    plt.plot(ts, xs[2, :], "k", linewidth=3)
-    x2nf, = plt.plot(ts, xsb[2, :], "g--", linewidth=3)
+    plt.plot(ts, xs[1, :], "k", linewidth=3)
+    x2nf, = plt.plot(ts, xsb[1, :], "g--", linewidth=3)
     if obs == 1:
-        y2, = plt.plot(ts[::skipm], ys[1][::skipm], "kx", markersize=5, markeredgewidth=1)
-    else:
         y2, = plt.plot(ts[::skipm], ys[::skipm], "kx", markersize=5, markeredgewidth=1)
+    else:
+        y2, = plt.plot(ts[::skipm], ys[1][::skipm], "kx", markersize=5, markeredgewidth=1)
     
-    plt.plot(ts, fmeans[2, :], "r--", linewidth=3)
+    plt.plot(ts, fmeans[1, :], "r--", linewidth=3)
     plt.ylabel(r"T$_R$ [K]")
     plt.locator_params(nbins=4)
     plt.xlabel("Time [min]")
