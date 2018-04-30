@@ -3,6 +3,7 @@ import numpy
 import copy
 import scipy.stats
 import typing
+import collections
 
 
 class Particles:
@@ -32,7 +33,7 @@ def init_spf(xdist, sdist, nP, xN):
     particles = Particles(numpy.zeros([xN, nP]), numpy.zeros(nP, dtype=numpy.int64), numpy.zeros(nP))
     for p in range(nP):
         xdraw = xdist.rvs()
-        sdraw = sdist.rvs()
+        sdraw = numpy.random.choice(range(len(sdist)), p=sdist)
         particles.x[:, p] = xdraw
         particles.s[p] = sdraw
         particles.w[p] = 1/nP  # uniform initial weight
@@ -48,7 +49,11 @@ def init_filter(particles, y, model):
     for p in range(N):
         for s in range(nS):
             if particles.s[p] == s:
-                particles.w[p] = particles.w[p]*model.ydists[s].pdf(y - model.G[s](particles.x[:, p]))
+                if not isinstance(y, collections.Iterable):
+                    particles.w[p] = particles.w[p]*model.ydists[s].pdf(y - model.G[s](particles.x[:, p]))
+                else:
+                    temp = numpy.subtract(y, model.G[s](particles.x[:, p]))
+                    particles.w[p] = particles.w[p] * model.ydists[s].pdf(temp)
 
     # particles.w = particles.w .+ abs(minimum(particles.w)) #no negative number issue
     particles.w /= sum(particles.w)
@@ -59,9 +64,8 @@ def init_filter(particles, y, model):
 
 
 def spf_filter(particles, u, y, model):
-
     nX, N = particles.x.shape
-    nS, = model.A.shape
+    nS, _ = model.A.shape
 
     # This can be made more compact but at the cost of clarity
     # first draw switch sample
@@ -77,7 +81,7 @@ def spf_filter(particles, u, y, model):
                 noise = model.xdists[s].rvs()
                 particles.x[:, p] = model.F[s](particles.x[:, p], u, noise)  # predict
                 particles.w[p] = particles.w[p]*model.ydists[s].pdf(y - model.G[s](particles.x[:, p]))
-                
+
                 if numpy.isnan(particles.w[p]):
                     print("Particle weight issue...")
                     particles.w[p] = 0
@@ -91,7 +95,7 @@ def spf_filter(particles, u, y, model):
             raise ValueError("Particles have become degenerate!")
 
     if number_effective_particles(particles) < N/2:
-        particles.resample(particles)
+        particles = resample(particles)
         
     return particles
     
@@ -209,6 +213,6 @@ def get_max_track(particles, numSwitches):
     for p in range(numParticles):
         totals[particles.s[p]] += particles.w[p]
 
-    maxtrack[numpy.argmax(totals)[0]] = 1.0
+    maxtrack[numpy.argmax(totals)] = 1.0
     return maxtrack
 
