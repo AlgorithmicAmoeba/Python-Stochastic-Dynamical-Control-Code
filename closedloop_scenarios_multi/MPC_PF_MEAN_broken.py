@@ -64,23 +64,29 @@ aline = 10.  # slope of constraint line ax + by + c = 0
 cline = -420.0  # negative of the y axis intercept
 bline = 1.0
 
-params.us[0] = MPC.mpc_mean(params.pfmeans[:, 0]-b, horizon, A, numpy.matrix(B), b, aline, bline, cline, params.QQ, params.RR, ysp, usp[0], 15000.0, 1000.0)  # get the controller input
+params.us[0] = MPC.mpc_mean(params.pfmeans[:, 0]-b, horizon, A, numpy.matrix(B), b, aline, bline, cline,
+                            params.QQ, params.RR, ysp, usp[0], 15000.0, 1000.0)  # get the controller input
 for t in range(1, params.N):
     d = numpy.zeros(2)
     if params.ts[t] < 100:
-        params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist.rvs()  # actual plant
+        params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+        params.xs[:, t] += state_noise_dist.rvs()  # actual plant
         xtemp = params.xs[:, t-1] - b
-        d = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) - (A @ xtemp + B * params.us[t-1] + b)
+        d = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+        d -= (A @ xtemp + B * params.us[t-1] + b)
     else:
-        params.xs[:, t] = params.cstr_model_broken.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + state_noise_dist.rvs()  # actual plant
+        params.xs[:, t] = params.cstr_model_broken.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+        params.xs[:, t] += state_noise_dist.rvs()  # actual plant
         xtemp = params.xs[:, t-1] - b
-        d = params.cstr_model_broken.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) - (A @ xtemp + B * params.us[t-1] + b)
+        d = params.cstr_model_broken.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+        d -= (A @ xtemp + B * params.us[t-1] + b)
 
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
     PF.pf_filter(particles, params.us[t-1], params.ys2[:, t], state_noise_dist, meas_noise_dist, cstr_pf)
     params.pfmeans[:, t], params.pfcovars[:, :, t] = PF.get_stats(particles)
     if t % 1 == 0:
-        params.us[t] = MPC.mpc_mean(params.pfmeans[:, t]-b, horizon, A, numpy.matrix(B), b, aline, bline, cline, params.QQ, params.RR, ysp, usp[0], 15000.0, 1000.0, d)
+        params.us[t] = MPC.mpc_mean(params.pfmeans[:, t]-b, horizon, A, numpy.matrix(B), b, aline, bline, cline,
+                                    params.QQ, params.RR, ysp, usp[0], 15000.0, 1000.0, d)
     else:
         params.us[t] = params.us[t-1]
     if params.us[t] is None or numpy.isnan(params.us[t]):
@@ -89,7 +95,8 @@ for t in range(1, params.N):
 
 # # Plot the results
 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.pfmeans, params.us, 2, ysp[0]+b[0])
-Results.plot_ellipses2(params.ts, params.xs, params.pfmeans, params.pfcovars, [aline, cline], [linsystems[2].op[1], 422.6], True, 4.6052, 1, "upper right")
+Results.plot_ellipses2(params.ts, params.xs, params.pfmeans, params.pfcovars, [aline, cline],
+                       [linsystems[2].op[1], 422.6], True, 4.6052, 1, "upper right")
 Results.check_constraint(params.ts, params.xs, [aline, cline])
 Results.calc_error1(params.xs, ysp[0]+b[0])
 Results.calc_energy(params.us, params.h)

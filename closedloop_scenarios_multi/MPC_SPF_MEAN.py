@@ -59,15 +59,17 @@ linsystems_broken = params.cstr_model_broken.get_nominal_linear_systems(params.h
 opoint = 1  # the specific linear model we will use
 
 lin_models = [None]*2   # type: typing.List[RBPF.Model]
-lin_models[0] = RBPF.Model(linsystems[opoint].A, linsystems[opoint].B, linsystems[opoint].b, params.C2, params.Q, params.R2)
-lin_models[1] = RBPF.Model(linsystems_broken[opoint].A, linsystems_broken[opoint].B, linsystems_broken[opoint].b, params.C2, params.Q, params.R2)
+lin_models[0] = RBPF.Model(linsystems[opoint].A, linsystems[opoint].B, linsystems[opoint].b,
+                           params.C2, params.Q, params.R2)
+lin_models[1] = RBPF.Model(linsystems_broken[opoint].A, linsystems_broken[opoint].B, linsystems_broken[opoint].b,
+                           params.C2, params.Q, params.R2)
 
 setpoint = linsystems[opoint].op
 H = numpy.matrix([1, 0])   # only attempt to control the concentration
 usps = numpy.zeros([len(lin_models), 1])
 for k in range(len(lin_models)):
     sp = setpoint[0] - lin_models[k].b[0]
-    x_off, usp = LQR.offset(lin_models[k].A, numpy.matrix(lin_models[k].B), params.C2, H, numpy.matrix([sp]))  # control offset
+    x_off, usp = LQR.offset(lin_models[k].A, numpy.matrix(lin_models[k].B), params.C2, H, numpy.matrix([sp]))
     ysp = x_off
     usp = numpy.array([usp])
     usps[k] = usp
@@ -97,15 +99,18 @@ params.spfmeans[:, 0], params.spfcovars[:, :, 0] = SPF.get_stats(particles)
 # ind = indmax(smoothedtrack[:, 1]) # use this model and controller
 ind = numpy.argmax(maxtrack[:, 0])  # use this model and controller
 yspfix = setpoint - lin_models[ind].b
-params.us[0] = MPC.mpc_mean(params.spfmeans[:, 0] - lin_models[ind].b, horizon, lin_models[ind].A, numpy.matrix(lin_models[ind].B), lin_models[ind].b, aline, bline, cline, params.QQ, params.RR, yspfix, usps[ind], 15000.0, 1000.0)  # get the controller input
+params.us[0] = MPC.mpc_mean(params.spfmeans[:, 0] - lin_models[ind].b, horizon, lin_models[ind].A,
+                            numpy.matrix(lin_models[ind].B), lin_models[ind].b, aline, bline, cline, params.QQ,
+                            params.RR, yspfix, usps[ind], 15000.0, 1000.0)  # get the controller input
 
 # Loop through the rest of time
 for t in range(1, params.N):
     random_element = state_noise_dist.rvs()
     if params.ts[t] < 100:  # break here
-        params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + random_element  # actual plant
+        params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + random_element
     else:
-        params.xs[:, t] = params.cstr_model_broken.run_reactor(params.xs[:, t-1], params.us[t-1], params.h) + random_element
+        params.xs[:, t] = params.cstr_model_broken.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+        params.xs[:, t] += random_element
 
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measured from actual plant
 
@@ -123,7 +128,9 @@ for t in range(1, params.N):
         # ind = indmax(smoothedtrack[:, t]) # use this model and controller
         ind = numpy.argmax(maxtrack[:, t])  # use this model and controller
         yspfix = setpoint - lin_models[ind].b
-        params.us[t] = MPC.mpc_mean(params.spfmeans[:, t] - lin_models[ind].b, horizon, lin_models[ind].A, numpy.matrix(lin_models[ind].B), lin_models[ind].b, aline, bline, cline, params.QQ, params.RR, yspfix, usps[ind], 15000.0, 1000.0)  # get the controller input
+        params.us[t] = MPC.mpc_mean(params.spfmeans[:, t] - lin_models[ind].b, horizon, lin_models[ind].A,
+                                    numpy.matrix(lin_models[ind].B), lin_models[ind].b, aline, bline, cline, params.QQ,
+                                    params.RR, yspfix, usps[ind], 15000.0, 1000.0)  # get the controller input
     else:
         params.us[t] = params.us[t-1]
     if params.us[t] is None or numpy.isnan(params.us[t]):
@@ -133,7 +140,8 @@ for t in range(1, params.N):
 Results.plot_switch_selection(numSwitches, maxtrack, params.ts, False)
 # Results.plotSwitchSelection(numSwitches, switchtrack, ts, true)
 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.spfmeans, params.us, 2, setpoint[0])
-Results.plot_ellipses2(params.ts, params.xs, params.spfmeans, params.spfcovars, [aline, cline], [setpoint[0], 422.6], True, 4.6052, 1, "best")
+Results.plot_ellipses2(params.ts, params.xs, params.spfmeans, params.spfcovars, [aline, cline],
+                       [setpoint[0], 422.6], True, 4.6052, 1, "best")
 Results.calc_error1(params.xs, setpoint[0])
 Results.calc_energy(params.us, params.h)
 # Results.checkConstraint(ts, xs, [aline, cline])
