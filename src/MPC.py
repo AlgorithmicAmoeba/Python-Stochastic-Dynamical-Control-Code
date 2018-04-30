@@ -4,7 +4,7 @@ import scipy.sparse
 import cvxpy
 
 
-def mpc_mean(x0, N, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, lim_u, lim_step_u):
+def mpc_mean(x0, N, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, lim_u, lim_step_u, d=numpy.zeros(2)):
     """return the MPC control input using a linear system"""
     B = B.T
     nx, nu = B.shape
@@ -49,7 +49,7 @@ def mpc_mean(x0, N, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, lim_u, lim_s
     e = int(cline + d_T @ b)
     limits = [-e] * N
 
-    bb = numpy.hstack([-x0, numpy.zeros(N * nx)])
+    bb = numpy.hstack([-x0, numpy.tile(-d, N)])
     L = numpy.hstack([limits, [-lim_step_u] * (N - 1), [-lim_u] * N])
     U = numpy.hstack([[numpy.inf] * N, [lim_step_u] * (N - 1), [lim_u] * N])
 
@@ -62,7 +62,7 @@ def mpc_mean(x0, N, A, B, b, aline, bline, cline, QQ, RR, ysp, usp, lim_u, lim_s
     prob = cvxpy.Problem(objective, constraints)
     try:
         prob.solve(solver='MOSEK')
-    except RuntimeError:
+    except:
         return None
     if prob.status != "optimal":
         print(prob.status)
@@ -143,7 +143,7 @@ def mpc_var(x0, cov0, N, A, B, b, aline, bline, cline, QQ, RR,
 
     try:
         prob.solve(solver='MOSEK')
-    except RuntimeError:
+    except:
         return None
     if prob.status != "optimal":
         print(prob.status)
