@@ -71,7 +71,7 @@ for k in range(len(linsystems)):
 maxtrack[:, 0] = RBPF.get_max_track(particles, numModels)
 
 # Controller Input
-ind = numpy.argmax(maxtrack[:, 0])[0]  # use this model and controller
+ind = numpy.argmax(maxtrack[:, 0])  # use this model and controller
 horizon = 150
 
 params.us[0] = MPC.mpc_lqr(params.rbpfmeans[:, 0] - models[ind].b, horizon, models[ind].A, numpy.matrix(models[ind].B),
@@ -97,7 +97,7 @@ for t in range(1, params.N):
 
     # Controller Input
     if t % 1 == 0:
-        ind = numpy.argmax(maxtrack[:, t])[0]  # use this model and controller
+        ind = numpy.argmax(maxtrack[:, t])  # use this model and controller
         params.us[t] = MPC.mpc_lqr(params.rbpfmeans[:, t] - models[ind].b, horizon, models[ind].A,
                                    numpy.matrix(models[ind].B),
                                    numpy.matrix(params.QQ), numpy.matrix(params.RR),
