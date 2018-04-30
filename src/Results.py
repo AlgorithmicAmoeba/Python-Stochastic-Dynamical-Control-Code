@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy
 import src.Ellipse as Ellipse
 
+mpl.rc("figure", figsize=(6.0, 4.5))
+
 
 def plot_tracking1(ts, xs, ys, fmeans, us, obs, setpoint):
 
