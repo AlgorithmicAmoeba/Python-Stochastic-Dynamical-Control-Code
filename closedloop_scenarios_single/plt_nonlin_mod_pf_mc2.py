@@ -21,7 +21,7 @@ ts = [x/10 for x in range(800)]
 
 # Now plot 90 % confidence regions!
 plt.figure()
-plt.subplot(4, 1, 1)  # mean
+plt.subplot(2, 1, 1)  # mean
 for k in range(cols):
     plt.plot(ts, mc1[:, k], "k-", linewidth=0.5)
 
@@ -29,7 +29,7 @@ plt.plot(ts, numpy.ones(rows)*0.49, "g-", linewidth=3.0)
 plt.ylabel(r"C$_A$ (I)")
 plt.locator_params(nbins=4)
 
-plt.subplot(4, 1, 2)  # 90%
+plt.subplot(2, 1, 2)  # 90%
 for k in range(cols):
     plt.plot(ts, mc2[:, k], "k-", linewidth=0.5)
 
