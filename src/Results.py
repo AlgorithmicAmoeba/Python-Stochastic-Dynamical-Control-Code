@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy
 import src.Ellipse as Ellipse
 
-mpl.rc("figure", figsize=(6.0, 3))
+mpl.rc("figure", figsize=(6, 3))  # 6, 3
 
 
 def plot_tracking1(ts, xs, ys, fmeans, us, obs, setpoint):
@@ -18,7 +18,7 @@ def plot_tracking1(ts, xs, ys, fmeans, us, obs, setpoint):
     else:
         subplt = 3
 
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
 
     skipmeas = int(len(ts) / 80)
@@ -69,23 +69,25 @@ def plot_tracking(ts, xs, ys, fmeans, us, obs):
     else:
         subplt = 3
     
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
 
     skipmeas = int(len(ts)/80)
     skipmean = int(len(ts)/40)
     plt.figure()
-    plt.subplot(subplt, 1, 1)
+    ax = plt.subplot(subplt, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
     if obs == 2:  # plt.plot second measurement
         plt.plot(ts[::skipmeas], ys[0][::skipmeas], "kx", markersize=5, markeredgewidth=1)
-    
+
     plt.plot(ts[::skipmean], fmeans[0][::skipmean], "bx", markersize=5, markeredgewidth=2)
     plt.ylabel(r"C$_A$ [kmol.m$^{-3}$]")
     plt.locator_params(nbins=4)
     plt.legend([x1], ["Underlying model"], loc="best")
     plt.xlim([0, tend])
+    plt.ylim(ymax=1.5)
     # ylim([0, 1])
+    # plt.setp(ax.get_xticklabels(), visible=False)
 
     plt.subplot(subplt, 1, 2)
     plt.plot(ts, xs[1, :], "k", linewidth=3)
@@ -99,7 +101,8 @@ def plot_tracking(ts, xs, ys, fmeans, us, obs):
     plt.locator_params(nbins=4)
     plt.legend([k2, y2], ["Filtered mean", "Observations"], loc="best")
     plt.xlim([0, tend])
-    # ylim([minimum(xs[2, :]), maximum(xs[2, :])])
+    # plt.ylim([340, 420])
+
     if subplt == 3:
         plt.subplot(subplt, 1, 3)
         plt.plot(ts, (1/60.0)*us)
@@ -108,10 +111,11 @@ def plot_tracking(ts, xs, ys, fmeans, us, obs):
     
     plt.locator_params(nbins=4)
     plt.xlabel("Time [min]")
+    # plt.subplots_adjust(wspace=0, hspace=0)
     
 
 def plot_state_space_switch(linsystems, xs):
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
     plt.figure()  # Model and state space
     for k in range(len(linsystems)):
@@ -127,6 +131,7 @@ def plot_state_space_switch(linsystems, xs):
     plt.plot(xs[0][0], xs[1][0], "ko", markersize=10, markeredgewidth=4)
     plt.plot(xs[0][-1], xs[1][-1], "kx", markersize=10, markeredgewidth=4)
     plt.xlim([-0.1, 1.1])
+    plt.ylim([300, 550])
     plt.xlabel(r"C$_A$ [kmol.m$^{-3}$]")
     plt.ylabel(r"T$_R$ [K]")
     
@@ -134,7 +139,7 @@ def plot_state_space_switch(linsystems, xs):
 def plot_switch_selection(numSwitches, strack, ts, cbaron):
 
     plt.figure()  # Model selection
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
     axes = [None]*numSwitches
     im = 0
@@ -169,7 +174,7 @@ def plot_switch_selection(numSwitches, strack, ts, cbaron):
 
 def plot_ellipses1(ts, xs, fmeans, fcovars, legloc):
 
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
     N = len(ts)
     skip = int(len(ts)/40)
@@ -191,7 +196,7 @@ def plot_ellipses1(ts, xs, fmeans, fcovars, legloc):
 
 def plot_ellipses2(ts, xs, fmeans, fcovars,  line, sp, nf, sigma, pick, legloc):
 
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
     N = len(ts)
     skip = int(len(ts)/40)
@@ -218,6 +223,7 @@ def plot_ellipses2(ts, xs, fmeans, fcovars,  line, sp, nf, sigma, pick, legloc):
     plt.xlim([min(xs[0, :]-1e-1), max(xs[0, :]+1e-1)])
     plt.ylim([min(xs[1, :]-10), max(xs[1, :]+10)])
     plt.plot(lxs, lys, "r-")
+    plt.xlim(xmin=0)
 
     plt.plot(sp[0], sp[1], "gx", markersize=8, markeredgewidth=4)
 
@@ -241,7 +247,7 @@ def plot_ellipse_comp(f1means, f1covars, f2means, f2covars, xs, ts, sigma=4.605)
     N = len(ts)
     skip = int(len(ts)/30)
     plt.figure()
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
     x1, = plt.plot(xs[0], xs[1], "k", linewidth=3)
     f1, = plt.plot(f1means[0][::skip], f1means[1][::skip], "yx", markersize=5, markeredgewidth=2)
@@ -270,7 +276,7 @@ def plot_tracking_break(ts, xs, xsb, ys, fmeans, obs):
     tend = ts[-1]
     skipm = int(len(ts)/80)
     plt.figure()  # plt.plot filtered results
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
     plt.subplot(2, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
@@ -305,7 +311,7 @@ def plot_tracking_two_filters(ts, xs, ys, f1means, f2means):
     skip = int(len(ts)/40)
     tend = ts[-1]
     plt.figure()  # plt.plot filtered results
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
     plt.subplot(2, 1, 1)
     x1, = plt.plot(ts, xs[0, :], "k", linewidth=3)
@@ -327,7 +333,7 @@ def plot_tracking_two_filters(ts, xs, ys, f1means, f2means):
     
 
 def plot_kl_div(ts, kldiv, basediv, unidiv, logged):
-    mpl.rc("font", family="serif", serif="Computer Modern", size=12)
+    mpl.rc("font", family="serif", serif="Computer Modern", size=8)
     mpl.rc("text", usetex=True)
 
     plt.figure()
@@ -410,7 +416,7 @@ def check_constraint(ts, xs, line):
     print("Minimum Negative Clearance: ", minneg)
 
     plt.figure()
-    mpl.rc("font", family="serif", size=12)
+    mpl.rc("font", family="serif", size=8)
     mpl.rc("text", usetex=True)
 
     plt.plot(ts, numpy.zeros([N]), "r", linewidth=1)
@@ -422,7 +428,7 @@ def check_constraint(ts, xs, line):
 def get_mc_res(xs, sigmas, line, mcdistmat, counter, h):
     """line = [b, c] => y + bx + c = 0
     line => y = - bx - c"""
-    d = numpy.array([line[0], 0])
+    d = numpy.array([line[0], 1])
     r, N = xs.shape
     negdist = 0
     timeviolated = 0

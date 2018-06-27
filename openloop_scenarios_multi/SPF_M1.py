@@ -91,7 +91,9 @@ for t in range(1, params.N):
 
 # Plot results
 Results.plot_switch_selection(numSwitches, switchtrack, params.ts, True)
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_11-5_python.pdf", bbox_inches="tight")
 Results.plot_switch_selection(numSwitches, maxtrack, params.ts, False)
 Results.plot_tracking_break(params.ts, params.xs, params.xsnofix, params.ys1, params.spfmeans, 1)
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_11-4_python.pdf", bbox_inches="tight")
 Results.calc_error(params.xs, params.spfmeans)
 plt.show()

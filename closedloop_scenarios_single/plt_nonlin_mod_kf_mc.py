@@ -15,8 +15,8 @@ import src.Ellipse as Ellipse
 # mcN = 1100
 # include("nonlin_mod_kf_lin_mpc_var_conf_999_mc.jl")
 
-
-mpc.rc("font", family="serif", serif="Computer Modern", size=12)
+mpc.rc("figure", figsize=(6.0, 3))
+mpc.rc("font", family="serif", serif="Computer Modern", size=8)
 mpc.rc("text", usetex=True)
 
 mc1 = abs(pandas.read_csv("nonlinmod_kf_mean.csv", header=None).as_matrix())
@@ -53,11 +53,11 @@ xs3, ys3 = Ellipse.ellipse(mmc3, cmc3)
 cs3 = plt.fill(xs3, ys3, "g", alpha=a, edgecolor="none")
 plt.plot(mmc3[0], mmc3[1], "go", markersize=10)
 
-xs4, ys4 = Ellipse.ellipse(mmc4, cmc4)
-cs4 = plt.fill(xs4, ys4, "b", alpha=a, edgecolor="none")
-plt.plot(mmc4[0], mmc4[1], "bo", markersize=10)
+# xs4, ys4 = Ellipse.ellipse(mmc4, cmc4)
+# cs4 = plt.fill(xs4, ys4, "b", alpha=a, edgecolor="none")
+plt.plot(0, 0, "bo", markersize=10)
 
-plt.axis(ymin=0.0, xmin=0.0, ymax=4, xmax=10)
+plt.axis(ymin=0.0, xmin=0.0, ymax=4, xmax=4)
 #
 # # Magenta = mean
 # # Red = 90%
@@ -70,4 +70,6 @@ plt.legend(["Expected value constraint",
             r"99$\%$ Chance constraint",
             r"99.9$\%$ Chance constraint"],
            loc="best")
+# plt.savefig("/home/ex/Documents/CSC/report/results/Figure_8-23_python.pdf", bbox_inches="tight")
 plt.show()
+

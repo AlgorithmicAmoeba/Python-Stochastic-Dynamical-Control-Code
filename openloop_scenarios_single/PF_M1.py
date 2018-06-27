@@ -46,9 +46,9 @@ for t in range(1, params.N):
 
 # Plot results
 Results.plot_ellipses1(params.ts, params.xs, params.pfmeans, params.pfcovars, "upper right")
-
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_7-3_python.pdf", bbox_inches="tight")
 Results.plot_tracking(params.ts, params.xs, params.ys1, params.pfmeans, params.us, 1)
-
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_7-2_python.pdf", bbox_inches="tight")
 Results.calc_error(params.xs, params.pfmeans)
 
 plt.show()

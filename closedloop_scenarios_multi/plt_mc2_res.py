@@ -6,28 +6,26 @@ import pandas
 import src.Results as Results
 
 # mcN = 50
-# include("nonlin_mod_kf_lin_mpc_mean_mc.jl")
-# include("nonlin_mod_kf_lin_mpc_var_conf_90_mc.jl")
-# include("nonlin_mod_kf_lin_mpc_var_conf_99_mc.jl")
-# include("nonlin_mod_kf_lin_mpc_var_conf_999_mc.jl")
+# include("lin_mod_kf_lin_mpc_mean_mc.jl")
+# include("lin_mod_kf_lin_mpc_var_conf_90_mc.jl")
+# include("lin_mod_kf_lin_mpc_var_conf_99_mc.jl")
+# include("lin_mod_kf_lin_mpc_var_conf_999_mc.jl")
 
-mpc.rc("figure", figsize=(6.0, 3))
 mpc.rc("font", family="serif", serif="Computer Modern", size=8)
 mpc.rc("text", usetex=True)
+mpc.rc("figure", figsize=(6.0, 3))
 
-
-mc1 = abs(pandas.read_csv("nonlinmod_kf_mean_mc2.csv", header=None).as_matrix())
-mc2 = abs(pandas.read_csv("nonlinmod_kf_var90_mc2.csv", header=None).as_matrix())
-mc3 = abs(pandas.read_csv("nonlinmod_kf_var99_mc2.csv", header=None).as_matrix())
-mc4 = abs(pandas.read_csv("nonlinmod_kf_var999_mc2.csv", header=None).as_matrix())
+mc1 = abs(pandas.read_csv("spf_mean_mc2.csv", header=None).as_matrix())
+mc2 = abs(pandas.read_csv("spf_var90_mc2.csv", header=None).as_matrix())
+mc3 = abs(pandas.read_csv("spf_var99_mc2.csv", header=None).as_matrix())
 
 
 rows, cols = mc1.shape  # all will have the same dimension
-ts = [x/10 for x in range(800)]
+ts = [x/10 for x in range(2000)]
 
 # Now plot 90 % confidence regions!
 plt.figure()
-plt.subplot(4, 1, 1)  # mean
+plt.subplot(3, 1, 1)  # mean
 for k in range(cols):
     plt.plot(ts, mc1[:, k], "k-", linewidth=0.5)
 
@@ -36,7 +34,7 @@ plt.ylabel(r"C$_A$ (I)")
 plt.locator_params(nbins=4)
 plt.xlim(xmin=0)
 
-plt.subplot(4, 1, 2)  # 90%
+plt.subplot(3, 1, 2)  # 90%
 for k in range(cols):
     plt.plot(ts, mc2[:, k], "k-", linewidth=0.5)
 
@@ -45,7 +43,7 @@ plt.ylabel(r"C$_A$ (II)")
 plt.locator_params(nbins=4)
 plt.xlim(xmin=0)
 
-plt.subplot(4, 1, 3)  # 99%
+plt.subplot(3, 1, 3)  # 99%
 for k in range(cols):
     plt.plot(ts, mc3[:, k], "k-", linewidth=0.5)
 
@@ -54,15 +52,7 @@ plt.ylabel(r"C$_A$ (III)")
 plt.locator_params(nbins=4)
 plt.xlim(xmin=0)
 
-plt.subplot(4, 1, 4)  # 99.9%
-for k in range(cols):
-    plt.plot(ts, mc4[:, k], "k-", linewidth=0.5)
-
-plt.plot(ts, numpy.ones(rows)*0.49, "g-", linewidth=3.0)
-plt.ylabel(r"C$_A$ (IV)")
-plt.locator_params(nbins=4)
 plt.xlabel("Time [min]")
-plt.xlim(xmin=0)
 
 A = 412
 mcerr1 = 0
@@ -82,11 +72,5 @@ for k in range(cols):
     mcerr3 += abs(Results.calc_error3(mc3[-100:-1, k], A))
 
 print("The average MC error is:", mcerr3/cols)
-
-mcerr4 = 0
-for k in range(cols):
-    mcerr4 += abs(Results.calc_error3(mc4[-100:-1, k], A))
-
-print("The average MC error is:", mcerr4/cols)
-plt.savefig("/home/ex/Documents/CSC/report/results/Figure_8-24_python.pdf", bbox_inches="tight")
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_12-14_python.pdf", bbox_inches="tight")
 plt.show()

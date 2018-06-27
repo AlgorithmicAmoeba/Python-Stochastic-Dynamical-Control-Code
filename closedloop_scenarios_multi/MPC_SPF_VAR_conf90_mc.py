@@ -18,7 +18,13 @@ mcdists = numpy.zeros([2, mcN])
 xconcen = numpy.zeros([params.N, mcN])
 mcerr = numpy.zeros(mcN)
 mciter = -1
-while mciter < mcN-1:
+
+aline = 10.  # slope of constraint line ax + by + c = 0
+cline = -410.0  # negative of the y axis intercept
+bline = 1.0
+
+
+def fun():
     isDone = True
     init_state = numpy.array([0.55, 450])  # initial state
 
@@ -26,18 +32,14 @@ while mciter < mcN-1:
     A = numpy.array([[0.999, 0.001],
                      [0.001, 0.999]])
 
-
     def fun1(x, u, w):
         return params.cstr_model.run_reactor(x, u, params.h) + w
-
 
     def fun2(x, u, w):
         return params.cstr_model_broken.run_reactor(x, u, params.h) + w
 
-
     def gs(x):
         return params.C2 @ x
-
 
     F = [fun1, fun2]
     G = [gs, gs]
@@ -83,10 +85,6 @@ while mciter < mcN-1:
 
     # Setup controller
     horizon = 150
-    # add state constraints
-    aline = 10.  # slope of constraint line ax + by + c = 0
-    cline = -410.0  # negative of the y axis intercept
-    bline = 1.0
 
     # Setup simulation
     params.xs[:, 0] = init_state
@@ -146,12 +144,20 @@ while mciter < mcN-1:
             if params.us[t] is None or numpy.isnan(params.us[t]):
                 isDone = False
                 break
+    return isDone, setpoint
 
-    if isDone:
-        mciter += 1
-        mcerr[mciter] = Results.calc_error1(params.xs, setpoint[0])
-        Results.get_mc_res(params.xs, params.spfcovars, [aline, cline], mcdists, mciter, params.h)
-        xconcen[:, mciter] = params.xs[0, :]
+
+while mciter < mcN-1:
+    try:
+        res, setpoint = fun()
+
+        if res:
+            mciter += 1
+            mcerr[mciter] = Results.calc_error1(params.xs, setpoint[0])
+            Results.get_mc_res(params.xs, params.spfcovars, [aline, cline], mcdists, mciter, params.h)
+            xconcen[:, mciter] = params.xs[0, :]
+    except:
+        continue
 
 mcave = sum(abs(mcerr))/mcN
 print("Monte Carlo average concentration error: ", mcave)

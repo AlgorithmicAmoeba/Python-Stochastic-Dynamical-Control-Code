@@ -72,7 +72,7 @@ for i in range(len(kfmeans[0])):
 
 # Plot Results
 Results.plot_ellipse_comp(pfmeans, pfcovars, kfmeans, kfcovars, params.xs, params.ts)
-
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_7-7_python.pdf", bbox_inches="tight")
 Results.plot_tracking_two_filters(params.ts, params.xs, params.ys2, pfmeans, kfmeans)
 
 print("For the Kalman Filter:")

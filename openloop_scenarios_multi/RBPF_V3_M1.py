@@ -72,7 +72,9 @@ for t in range(1, params.N):
 
 # Plot results
 Results.plot_state_space_switch(linsystems, params.xs)
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_9-3_python.pdf", bbox_inches="tight")
 Results.plot_switch_selection(numModels, switchtrack, params.ts, True)
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_9-5_python.pdf", bbox_inches="tight")
 # Results.plot_switch_selection(numModels, maxtrack, ts, false)
 # Results.plot_switch_selection(numModels, smoothedtrack, ts, false)
 Results.plot_tracking(params.ts, params.xs, params.ys1, params.rbpfmeans, params.us, 1)

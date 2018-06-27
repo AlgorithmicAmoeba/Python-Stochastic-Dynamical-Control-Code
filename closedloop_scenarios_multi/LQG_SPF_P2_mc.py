@@ -13,12 +13,8 @@ import typing
 tend = 200
 params = params.Params(tend)
 
-mcN = 50
-mcdists = numpy.zeros([2, mcN])
-xconcen = numpy.zeros([params.N, mcN])
-mcerr = numpy.zeros(mcN)
-mciter = -1
-while mciter < mcN-1:
+
+def fun():
     isDone = True
     init_state = numpy.array([0.55, 450])  # initial state
 
@@ -133,15 +129,26 @@ while mciter < mcN-1:
             if params.us[t] is None or numpy.isnan(params.us[t]):
                 isDone = False
                 break
+    return isDone, setpoint
 
-        if isDone:
+mcN = 50
+mcdists = numpy.zeros([2, mcN])
+xconcen = numpy.zeros([params.N, mcN])
+mcerr = numpy.zeros(mcN)
+mciter = -1
+while mciter < mcN-1:
+    try:
+        res, setpoint = fun()
+        if res:
             mciter += 1
             mcerr[mciter] = Results.calc_error1(params.xs, setpoint)
             Results.get_mc_res(params.xs, params.spfcovars, [10, -410], mcdists, mciter, params.h)
             xconcen[:, mciter] = params.xs[0, :]
+    except:
+        continue
 
-    mcave = sum(abs(mcerr)) / mcN
-    print("Monte Carlo average concentration error: ", mcave)
+mcave = sum(abs(mcerr)) / mcN
+print("Monte Carlo average concentration error: ", mcave)
 
 nocount = len(mcdists[0]) - numpy.count_nonzero(mcdists[0])
 filteredResults = numpy.zeros([2, mcN - nocount])

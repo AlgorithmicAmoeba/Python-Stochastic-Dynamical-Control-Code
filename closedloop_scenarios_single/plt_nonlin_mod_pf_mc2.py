@@ -9,8 +9,9 @@ import src.Results as Results
 # include("nonlin_mod_pf_lin_mpc_mean_mc.jl")
 # include("nonlin_mod_pf_lin_mpc_var_conf_90_mc.jl")
 
-mpc.rc("font", family="serif", serif="Computer Modern", size=12)
+mpc.rc("font", family="serif", serif="Computer Modern", size=8)
 mpc.rc("text", usetex=True)
+mpc.rc("figure", figsize=(6.0, 3))
 
 mc1 = abs(pandas.read_csv("nonlinmod_pf_mean_mc2.csv", header=None).as_matrix())
 mc2 = abs(pandas.read_csv("nonlinmod_pf_var90_mc2.csv", header=None).as_matrix())
@@ -28,6 +29,7 @@ for k in range(cols):
 plt.plot(ts, numpy.ones(rows)*0.49, "g-", linewidth=3.0)
 plt.ylabel(r"C$_A$ (I)")
 plt.locator_params(nbins=4)
+plt.xlim(xmin=0)
 
 plt.subplot(2, 1, 2)  # 90%
 for k in range(cols):
@@ -36,6 +38,7 @@ for k in range(cols):
 plt.plot(ts, numpy.ones(rows)*0.49, "g-", linewidth=3.0)
 plt.ylabel(r"C$_A$ (II)")
 plt.locator_params(nbins=4)
+plt.xlim(xmin=0)
 
 plt.xlabel("Time [min]")
 
@@ -51,5 +54,5 @@ for k in range(cols):
     mcerr2 += abs(Results.calc_error3(mc2[-100:-1, k], A))
 
 print("The average MC error is:", mcerr2/cols)
-
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_8-28_python.pdf", bbox_inches="tight")
 plt.show()

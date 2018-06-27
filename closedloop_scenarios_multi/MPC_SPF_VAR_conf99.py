@@ -140,10 +140,13 @@ for t in range(1, params.N):
 
 # Plot results
 Results.plot_switch_selection(numSwitches, maxtrack, params.ts, False)
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_12-11_python.pdf", bbox_inches="tight")
 Results.plot_switch_selection(numSwitches, switchtrack, params.ts, True)
 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.spfmeans, params.us, 2, setpoint[0])
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_12-10_python.pdf", bbox_inches="tight")
 Results.plot_ellipses2(params.ts, params.xs, params.spfmeans, params.spfcovars, [aline, cline],
                        [linsystems[1].op[1], 422.6], True, 9.21, 1, "best")
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_12-12_python.pdf", bbox_inches="tight")
 Results.calc_error1(params.xs, setpoint[0])
 Results.calc_energy(params.us, params.h)
 Results.check_constraint(params.ts, params.xs, [aline, cline])

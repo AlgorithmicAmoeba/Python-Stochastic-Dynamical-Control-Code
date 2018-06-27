@@ -56,8 +56,9 @@ for i in range(len(params.linxs[0])):
 # Plot results
 
 Results.plot_ellipses1(params.ts, params.xs, kfmeans, kfcovars, "upper right")
-
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_6-5_python.pdf", bbox_inches="tight")
 Results.plot_tracking(params.ts, params.xs, params.ys1, kfmeans, params.us, 1)
+plt.savefig("/home/ex/Documents/CSC/report/results/Figure_6-4_python.pdf", bbox_inches="tight")
 
 plt.show()
 avediff = Results.calc_error(params.xs, kfmeans)

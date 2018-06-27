@@ -11,13 +11,14 @@ import src.Ellipse as Ellipse
 # mcN = 700
 # include("nonlin_mod_pf_lin_mpc_var_conf_90_mc.jl")
 
-mpc.rc("font", family="serif", serif="Computer Modern", size=12)
+mpc.rc("font", family="serif", serif="Computer Modern", size=8)
 mpc.rc("text", usetex=True)
+mpc.rc("figure", figsize=(6.0, 3))
 
-mc1 = abs(pandas.read_csv("nonlinmod_kf_mean_mc.csv", header=None).as_matrix())
-mc2 = abs(pandas.read_csv("nonlinmod_kf_var90_mc.csv", header=None).as_matrix())
-mc3 = abs(pandas.read_csv("nonlinmod_pf_mean_mc.csv", header=None).as_matrix())
-mc4 = abs(pandas.read_csv("nonlinmod_pf_var90_mc.csv", header=None).as_matrix())
+mc1 = abs(pandas.read_csv("nonlinmod_kf_mean.csv", header=None).as_matrix())
+mc2 = abs(pandas.read_csv("nonlinmod_kf_var90.csv", header=None).as_matrix())
+mc3 = abs(pandas.read_csv("nonlinmod_pf_mean.csv", header=None).as_matrix())
+mc4 = abs(pandas.read_csv("nonlinmod_pf_var90.csv", header=None).as_matrix())
 
 
 mc1 = Auxiliary.remove_outliers(mc1, 3)
@@ -53,7 +54,7 @@ xs4, ys4 = Ellipse.ellipse(mmc4, cmc4)
 cs4 = plt.fill(xs4, ys4, "b", alpha=a, edgecolor="none")
 plt.plot(mmc4[0], mmc4[1], "bo", markersize=10)
 
-plt.axis(ymin=0.0, xmin=0.0, ymax=2.5, xmax=30)
+plt.axis(ymin=0.0, xmin=0.0, ymax=5, xmax=4)
 #
 # # Magenta = mean
 # # Red = 90%
@@ -62,10 +63,10 @@ plt.axis(ymin=0.0, xmin=0.0, ymax=2.5, xmax=30)
 plt.xlabel("Mahalanobis area in violation")
 plt.ylabel("Time in violation [min]")
 plt.legend(["Expected value constraint KF",
-            r"90$\%$ Chance constraint KF",
             "Expected value constraint PF",
+            r"90$\%$ Chance constraint KF",
             r"90$\%$ Chance constraint PF"],
-           loc="best")
-
+           loc="lower right")
+# plt.savefig("/home/ex/Documents/CSC/report/results/Figure_8-27_python.pdf", bbox_inches="tight")
 plt.show()
 

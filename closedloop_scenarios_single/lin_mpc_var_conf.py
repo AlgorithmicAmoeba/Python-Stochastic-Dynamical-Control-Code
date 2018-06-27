@@ -207,7 +207,6 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
 
         if mcN == 1:
             # Plot the results
-
             if numerical:
                 Results.plot_kl_div(klts, kldiv, basediv, unidiv, False)
                 Results.plot_kl_div(klts, kldiv, basediv, unidiv, True)
@@ -216,15 +215,19 @@ def main(nine, mcN=1, linear=True, pf=False, numerical=False):
                 print("The average divergence for the uniform is: ", 1.0 / len(klts) * sum(unidiv))
             elif pf:
                 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.pfmeans, params.us, 2, ysp[0] + b[0])
+                plt.savefig("/home/ex/Documents/CSC/report/results/Figure_8-25_python.pdf", bbox_inches="tight")
                 Results.plot_ellipses2(params.ts, params.xs, params.pfmeans, params.pfcovars, [aline, cline],
                                        linsystems[1].op, True, -2.0 * numpy.log(1 - 0.9), plot_setting, "best")
+                plt.savefig("/home/ex/Documents/CSC/report/results/Figure_8-26_python.pdf", bbox_inches="tight")
                 Results.check_constraint(params.ts, params.xs, [aline, cline])
                 Results.calc_error1(params.xs, ysp[0] + b[0])
                 Results.calc_energy(params.us, 0.0)
             else:
                 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.kfmeans, params.us, 2, ysp[0]+b[0])
+                plt.savefig("/home/ex/Documents/CSC/report/results/Figure_8-19_python.pdf", bbox_inches="tight")
                 Results.plot_ellipses2(params.ts, params.xs, params.kfmeans, params.kfcovars, [aline, cline],
                                        linsystems[opoint].op, True, k_squared, plot_setting, "best")
+                plt.savefig("/home/ex/Documents/CSC/report/results/Figure_8-20_python.pdf", bbox_inches="tight")
                 Results.check_constraint(params.ts, params.xs, [aline, cline])
                 Results.calc_error1(params.xs, ysp[0]+b[0])
                 Results.calc_energy(params.us, 0.0)
