@@ -26,8 +26,8 @@ b = linsystems[opoint].b  # offset from the origin
 # Set point
 ysp = linsystems[opoint].op[0] - b[0]  # Medium concentration
 H = numpy.matrix([1, 0])  # only attempt to control the concentration
-x_off, usp = LQR.offset(A, numpy.matrix(B), params.C2, H, numpy.array([ysp]))  # control offset
-ysp = x_off
+x_off, usp = LQR.offset(A, numpy.matrix(B), params.C2, H, numpy.matrix([ysp]))  # control offset
+ysp = x_off + numpy.array([-0.1, 0])
 usp = numpy.array([usp])
 
 # Set up the KF
@@ -42,23 +42,23 @@ temp = kf_cstr.init_filter(init_state-b, params.init_state_covar, params.ys2[:, 
 params.kfmeans[:, 0], params.kfcovars[:, :, 0] = temp
 
 horizon = 150
-params.us[0] = MPC.mpc_lqr(params.kfmeans[:, 0], horizon, A, numpy.matrix(B),
-                           params.QQ, params.RR, numpy.array([0, 0]), numpy.array([0.0]))  # get the controller input
+params.us[0] = MPC.mpc_lqr(params.xs[:, 0], horizon, A, numpy.matrix(B),
+                           params.QQ, params.RR, ysp, numpy.array([0.0]))  # get the controller input
 
 for t in range(1, params.N):
-    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1], params.us[t-1], params.h)
+    params.xs[:, t] = params.cstr_model.run_reactor(params.xs[:, t-1] + b, params.us[t-1], params.h) - b
     params.xs[:, t] += state_noise_dist.rvs()
 
     params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
     temp = kf_cstr.step_filter(params.kfmeans[:, t - 1], params.kfcovars[:, :, t - 1], params.us[t - 1],
-                               params.ys2[:, t]-b)
+                               params.ys2[:, t])
     params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
 
     # Compute controller action
     if t % 10 == 0:
-        params.us[t] = MPC.mpc_lqr(params.kfmeans[:, t], horizon, A,
+        params.us[t] = MPC.mpc_lqr(params.xs[:, t], horizon, A,
                                    numpy.matrix(B), params.QQ, params.RR,
-                                   numpy.array([0, 0]), numpy.array([0.0]))  # get the controller input
+                                   ysp, numpy.array([0.0]))  # get the controller input
         if params.us[t] is None or numpy.isnan(params.us[t]):
             break
     else:
@@ -66,6 +66,8 @@ for t in range(1, params.N):
 
 for i in range(len(params.kfmeans[0])):
     params.kfmeans[:, i] += b
+    params.xs[:, i] += b
+    params.ys2[:, i] += b
 
 # Plot the results
 Results.plot_tracking1(params.ts, params.xs, params.ys2, params.kfmeans, params.us, 2, ysp[0] + b[0])

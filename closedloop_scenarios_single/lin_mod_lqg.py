@@ -36,25 +36,25 @@ state_noise_dist = scipy.stats.multivariate_normal(cov=params.Q)
 meas_noise_dist = scipy.stats.multivariate_normal(cov=params.R2)
 
 # First time step of the simulation
-params.xs[:, 0] = init_state - b  # set simulation starting point to the random initial state
-params.ys2[:, 0] = params.C2 @ params.xs[:, 0] + meas_noise_dist.rvs()  # measure from actual plant
+params.xs[:, 0] = init_state  # set simulation starting point to the random initial state
+params.ys2[:, 0] = params.C2 @ params.xs[:, 0]  # + meas_noise_dist.rvs()  # measure from actual plant
 temp = kf_cstr.init_filter(init_state-b, params.init_state_covar, params.ys2[:, 0])  # filter
 params.kfmeans[:, 0], params.kfcovars[:, :, 0] = temp
 
 horizon = 150
-params.us[0] = MPC.mpc_lqr(params.kfmeans[:, 0], horizon, A, numpy.matrix(B),
+params.us[0] = MPC.mpc_lqr(params.ys2[:, 0]-b, horizon, A, numpy.matrix(B),
                            params.QQ, params.RR, numpy.array([0, 0]), numpy.array([0.0]))  # get the controller input
 
 for t in range(1, params.N):
-    params.xs[:, t] = A @ (params.xs[:, t-1]-b) + B*params.us[t-1] + b + state_noise_dist.rvs()  # actual plant
+    params.xs[:, t] = A @ (params.xs[:, t-1]-b) + B*params.us[t-1] + b  # + state_noise_dist.rvs()  # actual plant
 
-    params.ys2[:, t] = params.C2 @ params.xs[:, t] + meas_noise_dist.rvs()  # measure from actual plant
+    params.ys2[:, t] = params.C2 @ params.xs[:, t]  # + meas_noise_dist.rvs()  # measure from actual plant
     temp = kf_cstr.step_filter(params.kfmeans[:, t-1], params.kfcovars[:, :, t-1], params.us[t-1], params.ys2[:, t]-b)
     params.kfmeans[:, t], params.kfcovars[:, :, t] = temp
 
     # Compute controller action
     if t % 10 == 0:
-        params.us[t] = MPC.mpc_lqr(params.kfmeans[:, t], horizon, A,
+        params.us[t] = MPC.mpc_lqr(params.ys2[:, t]-b, horizon, A,
                                    numpy.matrix(B), params.QQ, params.RR,
                                    numpy.array([0, 0]), numpy.array([0.0]))  # get the controller input
         if params.us[t] is None or numpy.isnan(params.us[t]):
